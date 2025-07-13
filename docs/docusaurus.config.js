@@ -31,6 +31,7 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          path: 'docs.ja',
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
             'https://github.com/z3z1ma/dbt-osmosis/tree/main/docs/',
