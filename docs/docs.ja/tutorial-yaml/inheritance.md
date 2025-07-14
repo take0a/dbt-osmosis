@@ -1,31 +1,31 @@
 ---
 sidebar_position: 3
 ---
-# Inheritance
+# 継承
 
-## Overview
+## 概要
 
-One of the most powerful features of dbt-osmosis is **multi-level column documentation inheritance**. This means **all** relevant tags, descriptions, and meta fields for your columns can **cascade** from **any** upstream node to your current model.
+dbt-osmosis の最も強力な機能の一つは、**複数レベルの列ドキュメント継承**です。つまり、列の**すべての**関連タグ、説明、メタフィールドを、**任意の**上流ノードから現在のモデルに**カスケード**できます。
 
-For instance, if:
+例えば、次のような場合です。
 
-1. **Source** `salesforce` defines a column `contact_id` with a thorough description and some compliance tags (e.g. `["GDPR", "PII"]`).
-2. A **staging model** aliases it to the same column name (`contact_id`) but doesn’t bother re-describing it.
-3. A subsequent **intermediate** model references that staging model without modifying or renaming the column…
+1. **ソース** `salesforce` が列 `contact_id` を定義し、詳細な説明とコンプライアンスタグ（例: `["GDPR", "PII"]`）が付与されているとします。
+2. **ステージングモデル** が、この列に同じ列名（`contact_id`）のエイリアスを設定しますが、再定義は行いません。
+3. 後続の**中間**モデルが、列名を変更したり変更したりすることなく、そのステージングモデルを参照します。
 
-dbt-osmosis can detect that the final model’s `contact_id` inherits documentation from the source. This approach ensures **DRY** docs: define them once, pass them everywhere.
+dbt-osmosis は、最終モデルの `contact_id` がソースからドキュメントを継承していることを検出できます。このアプローチにより、**DRY** ドキュメント（一度定義すれば、どこにでも渡せる）が実現されます。
 
-## How It Works
+## どのように動くか
 
-### 1. Building an Ancestor Tree
+### 1. 祖先ツリーの構築
 
-When dbt-osmosis looks at a given node (model, seed, or source), it first builds an **ancestor tree** by traversing all upstream dependencies—including **multiple** levels of parents. Concretely:
+dbt-osmosis は、特定のノード（モデル、シード、またはソース）を参照する際、まず上流のすべての依存関係（複数レベルの親を含む）を走査して **祖先ツリー** を構築します。具体的には以下のようになります。
 
-- It ignores ephemeral nodes (which typically aren’t documented or part of the lineage).
-- It collects every **unique** ancestor node (source, seed, or model).
-- If a node has more than one ancestor, it includes them **all** (not just the direct parent).
+- 一時的なノード（通常はドキュメント化されていないか、系統の一部ではない）は無視します。
+- すべての **一意の** 祖先ノード（ソース、シード、またはモデル）を収集します。
+- ノードに複数の祖先がある場合は、それらをすべて（直接の親だけでなく）含めます。
 
-Internally, this is driven by `_build_node_ancestor_tree(...)` in the code. The result is a structure that might look like:
+内部的には、これはコード内の `_build_node_ancestor_tree(...)` によって実行されます。結果は次のような構造になります。
 
 ```
 {
@@ -35,39 +35,39 @@ Internally, this is driven by `_build_node_ancestor_tree(...)` in the code. The 
 }
 ```
 
-### 2. Aggregating a “Knowledge Graph”
+### 2. 「ナレッジグラフ」の集約
 
-dbt-osmosis then **reverses** that tree so it can start from the **oldest** ancestor (like your source) and move **forward** in time through staging or intermediate nodes. It effectively layers each node’s documentation onto the final child. This is handled by `_build_column_knowledge_graph(...)`, which:
+dbt-osmosis は、そのツリーを**逆順に** し、**最も古い**祖先（ソースノードなど）から開始して、ステージングノードや中間ノードを経由して**時間的に前方**に進みます。これにより、各ノードのドキュメントが最終的な子ノードに効果的に重ねられます。これは `_build_column_knowledge_graph(...)` によって処理され、以下の処理が行われます。
 
-- Examines **every** column in your final node.
-- Looks for matches in each ancestor’s columns.
-- **Merges** any descriptions, tags, meta fields, or other specified keys from the ancestor into the child’s doc if the child’s doc is missing or is a placeholder.
-- Skips ephemeral nodes and merges from all others.
+- 最終ノードの**すべての**列を調べます。
+- 各祖先の列で一致するものを検索します。
+- 子ノードのドキュメントが欠落しているかプレースホルダである場合、祖先からの説明、タグ、メタフィールド、その他の指定されたキーを子ノードのドキュメントに**マージ**します。
+- エフェメラルノードをスキップし、その他のすべてのノードからマージします。
 
-As it merges, it respects your config flags, e.g. `--skip-merge-meta` or `--skip-add-tags`. If the child already has a **non-empty** description, it won’t overwrite it (unless you used `--force-inherit-descriptions`). If the child has only a placeholder, that is replaced with the upstream doc.
+マージの際には、設定フラグが考慮されます。例: `--skip-merge-meta` または `--skip-add-tags` を使用します。子プロセスに既に**空でない**説明がある場合、上書きは行われません（`--force-inherit-descriptions` を使用した場合を除く）。子プロセスにプレースホルダしかない場合は、アップストリームのドキュメントに置き換えられます。
 
-### 3. Handling Renames and Fuzzy Matching
+### 3. 名前変更とあいまい一致の処理
 
-By default, dbt-osmosis expects **exact** column name matches to pass doc down. However, the code also includes:
+dbt-osmosis は、デフォルトでは列名が **完全** に一致することを前提としています。ただし、コードには以下の処理も含まれています。
 
-- **FuzzyCaseMatching**: handles uppercase vs. lowercase variations.
-- **FuzzyPrefixMatching**: can strip known prefixes, e.g. if your staging model renamed `contact_id` to `stg_contact_id` but you still want to treat them as the same column.
+- **FuzzyCaseMatching**: 大文字と小文字の差異を処理します。
+- **FuzzyPrefixMatching**: 既知のプレフィックスを削除できます。例えば、ステージングモデルで `contact_id` を `stg_contact_id` に名前変更した場合でも、これらを同じ列として扱いたい場合などです。
 
-In the future, these hooks may expand further for more advanced fuzzy matches or ignoring certain patterns. You can also implement your own plugin to handle custom rename rules.
+将来的には、これらのフックがさらに拡張され、より高度なあいまい一致や特定のパターンの無視が可能になる可能性があります。また、独自の名前変更ルールを処理するプラグインを実装することもできます。
 
-### 4. Updating the Child Node
+### 4. 子ノードの更新
 
-Finally, once the “knowledge graph” is built, dbt-osmosis updates each column in the child node. This step is done by `inherit_upstream_column_knowledge(...)`. If the child column is missing data—like a description—it’s **populated** with the best available doc from an upstream ancestor.
+最後に、「ナレッジグラフ」が構築されると、dbt-osmosis は子ノードの各列を更新します。このステップは `inherit_upstream_column_knowledge(...)` によって実行されます。子列に説明などのデータが欠落している場合は、上流の祖先から利用可能な最適なドキュメントが**入力**されます。
 
-## Example
+## 例
 
-Imagine a lineage chain:
+リネージのチェーンを想像してください:
 
 ```
 source.salesforce → staging.salesforce_contacts → intermediate.int_contacts → marts.int_contacts_reporting
 ```
 
-Your `source.salesforce` might say:
+`source.salesforce` には次のように記述されているかもしれない:
 
 ```yaml
 columns:
@@ -78,42 +78,42 @@ columns:
     description: "Primary email address of the contact"
 ```
 
-Your `staging.salesforce_contacts` might not redefine `contact_id` or `email`. So dbt-osmosis sees they are “inherited.” Then your `intermediate.int_contacts` has `contact_id`, but changes the description to “Contact ID, updated daily.” So, by the time we get to `marts.int_contacts_reporting`, that new description has priority. We still preserve the original compliance tags from the source unless you removed or modified them along the way.
+`staging.salesforce_contacts` では `contact_id` や `email` が再定義されていない可能性があります。そのため、dbt-osmosis はこれらを「継承」したものと認識します。その後、`intermediate.int_contacts` には `contact_id` がありますが、説明が「連絡先ID、毎日更新」に変更されます。そのため、`marts.int_contacts_reporting` に到達する頃には、新しい説明が優先されます。途中で削除または変更しない限り、元のコンプライアンスタグはそのまま保持されます。
 
-## When Columns Diverge
+## 列の相違する場合
 
-If at some point you rename columns or drastically change their meaning (while still using the same name upstream), dbt-osmosis stops short of forcing them to match. You can:
+ある時点で列名を変更したり、（上流で同じ名前を使用しながら）列の意味を大幅に変更したりした場合、dbt-osmosis は列を強制的に一致させることはありません。以下の方法があります。
 
-- **Manually** override the doc in the child to reflect the new meaning.
-- If you truly want them to be distinct, you give it a different name, thus skipping inheritance for that new column name.
-- Or leverage fuzzy prefix logic if you’re systematically prefixing them and still want doc to pass down.
+- **手動で** 子のドキュメントを上書きして新しい意味を反映させる。
+- 列を本当に区別したい場合は、別の名前を付けることで、新しい列名の継承をスキップする。
+- あるいは、体系的にプレフィックスを付けつつもドキュメントを下位に継承したい場合は、ファジープレフィックスロジックを活用する。
 
-## Config Flags That Control Inheritance
+## 継承を制御する設定フラグ
 
-Below are some relevant flags to refine how much doc merges:
+ドキュメントマージの程度を調整するための関連フラグをいくつか紹介します。
 
-- `--skip-merge-meta`: Skip inheriting `meta` fields from parent nodes.
-- `--skip-add-tags`: Skip inheriting tags from upstream.
-- `--force-inherit-descriptions`: Overwrite the child’s existing (but possibly placeholder) descriptions with the parent’s doc.
-- `--add-progenitor-to-meta`: Mark each column with a `meta.osmosis_progenitor` field, so you can see *which* node it was inherited from.
-- `--add-inheritance-for-specified-keys=policy_tags` (and so on): Inherit additional custom fields from your upstream docs.
+- `--skip-merge-meta`: 親ノードからの `meta` フィールドの継承をスキップします。
+- `--skip-add-tags`: アップストリームからのタグの継承をスキップします。
+- `--force-inherit-descriptions`: 子ノードの既存の（ただしプレースホルダの可能性がある）説明を親ノードのドキュメントで上書きします。
+- `--add-progenitor-to-meta`: 各列に `meta.osmosis_progenitor` フィールドを追加して、*どの*ノードから継承されたかを確認します。
+- `--add-inheritance-for-specified-keys=policy_tags` (など): アップストリームドキュメントから追加のカスタムフィールドを継承します。
 
-## Key Benefits
+## 主なメリット
 
-- **Eliminate Repetitive Docs**: Document columns once at the source (or the earliest staging) and let everything downstream reuse it.
-- **Propagate Compliance Tags**: If `GDPR` or `PII` tags are attached to certain columns, they follow that column across your entire pipeline.
-- **Promote Consistency**: No more “different descriptions for the same field.”
-- **Extendable**: You can create your own fuzzy matching logic if your naming patterns are more complex.
+- **重複ドキュメントの排除**: ソース（または最初のステージング）で列を一度ドキュメント化すれば、下流のすべてで再利用できます。
+- **コンプライアンスタグの伝播**: 特定の列に「GDPR」または「PII」タグが付加されている場合、パイプライン全体でその列にタグが適用されます。
+- **一貫性の向上**: 「同じフィールドに異なる説明」がなくなる。
+- **拡張可能**: 命名パターンが複雑な場合は、独自のあいまい一致ロジックを作成できます。
 
-## Future Enhancements
+## 今後の機能強化
 
-- **Robust Fuzzy Matching**: Extending column name matching to handle more patterns or partial renames.
-- **External Data Dictionary**: Ingest a CSV or JSON dictionary of columns and doc them as if they were an upstream node.
-- **Integration with LLMs**: Combining the knowledge graph with an LLM to automatically fill out doc for columns that have none—**dbt-osmosis** already supports `--synthesize` for OpenAI, but deeper integration is possible.
-- **Ignoring Common Prefixes**: For example, ignoring “stg_” or “dim_” while linking columns between child and parent.
+- **堅牢なあいまい一致**: 列名の一致を拡張し、より多くのパターンや部分的な名前変更に対応します。
+- **外部データ辞書**: 列のCSVまたはJSON辞書を取り込み、上流ノードであるかのようにドキュメントを作成します。
+- **LLMとの統合**: ナレッジグラフとLLMを組み合わせることで、ドキュメントが存在しない列のドキュメントを自動的に作成します。**dbt-osmosis**は既にOpenAI用の`--synthesize`をサポートしていますが、より深い統合も可能です。
+- **共通プレフィックスの無視**: 例えば、子と親の間で列をリンクする際に「stg_」や「dim_」を無視します。
 
 ---
 
-### Takeaways
+### まとめ
 
-**Multi-level column inheritance** is a central feature of dbt-osmosis that drastically cuts down on repetitive documentation. By building a knowledge graph from all upstream nodes, dbt-osmosis ensures each model or source gets the most complete doc possible for every column, while letting you override or skip certain merges as needed. Whether you want to unify compliance tags, pass down descriptions, or unify large parts of your lineage, **inheritance** is how you keep your doc consistent without repeating yourself.
+**複数レベルの列継承** は、dbt-osmosis の中心的な機能であり、重複したドキュメント作成を大幅に削減します。dbt-osmosis は、上流ノードすべてからナレッジグラフを構築することで、各モデルまたはソースのすべての列について可能な限り完全なドキュメントを取得し、必要に応じて特定のマージをオーバーライドまたはスキップできるようにします。コンプライアンスタグを統一したり、説明を継承したり、系統の大部分を統一したりする場合でも、**継承** は、重複することなくドキュメントの一貫性を維持する方法です。.

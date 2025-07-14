@@ -1,128 +1,128 @@
 ---
 sidebar_position: 2
 ---
-# CLI Overview
+# CLI の概要
 
-Below is a high-level overview of the commands currently provided by dbt-osmosis. Each command also supports additional options such as:
+以下は、dbt-osmosis が現在提供しているコマンドの概要です。各コマンドは、以下の追加オプションもサポートしています。
 
-- `--dry-run` to prevent writing changes to disk
-- `--check` to exit with a non-zero code if changes would have been made
-- `--fqn` to filter nodes by [dbt's FQN](https://docs.getdbt.com/reference/node-selection/syntax#the-fqn-method) segments
-- `--disable-introspection` to run without querying the warehouse (helpful if you are offline), often paired with `--catalog-path`
-- `--catalog-path` to read columns from a prebuilt `catalog.json`
+- `--dry-run` : ディスクへの変更の書き込みを防止します。
+- `--check` : 変更が行われた場合にゼロ以外のコードで終了します。
+- `--fqn` : [dbt の FQN](https://docs.getdbt.com/reference/node-selection/syntax#the-fqn-method) セグメントでノードをフィルタリングします。
+- `--disable-introspection` : ウェアハウスへのクエリを実行せずに実行します（オフラインの場合に便利です）。多くの場合、`--catalog-path` と組み合わせて使用されます。
+- `--catalog-path` : 事前に構築された `catalog.json` から列を読み込みます。
 
-Other helpful flags are described in each command below.
+その他の便利なフラグについては、以下の各コマンドで説明します。
 
-## YAML Management
+## YAML 管理
 
-**All of the following commands live under** `dbt-osmosis yaml <command>`.
+**以下のコマンドはすべて** `dbt-osmosis yaml <command>` の下にあります。
 
 ### Organize
 
-Restructures your schema YAML files based on the **declarative** configuration in `dbt_project.yml`. Specifically, it:
+`dbt_project.yml` の **宣言的** な設定に基づいて、スキーマ YAML ファイルを再構成します。具体的には、以下の処理を行います。
 
-- Bootstraps missing YAML files for any undocumented models or sources
-- Moves or merges existing YAML files according to your configured rules (the `+dbt-osmosis:` keys)
+- ドキュメント化されていないモデルやソースについて、不足している YAML ファイルをブートストラップします。
+- 設定したルール（`+dbt-osmosis:` キー）に従って、既存の YAML ファイルを移動またはマージします。
 
 ```bash
 dbt-osmosis yaml organize [--project-dir] [--profiles-dir] [--target] [--fqn ...] [--dry-run] [--check]
 ```
 
-Options often used:
+よく使用されるオプション:
 
-- `--auto-apply` to apply all file location changes without asking for confirmation
-- `--disable-introspection` + `--catalog-path=/path/to/catalog.json` if not connected to a warehouse
+- `--auto-apply` : 確認メッセージを表示せずにすべてのファイルの場所の変更を適用します
+- `--disable-introspection` + `--catalog-path=/path/to/catalog.json` : ウェアハウスに接続されていない場合
 
 ### Document
 
-Passes down column-level documentation from upstream nodes to downstream nodes (a deep inheritance). Specifically, it can:
+列レベルのドキュメントを上流ノードから下流ノードに渡します（深い継承）。具体的には、以下の操作を実行できます。
 
-- Add columns that are present in the database (or `catalog.json`) but missing from your YAML
-- Remove columns missing from your database (optional, if used with other steps)
-- Reorder columns (optional, if combined with your sorting preference—see below)
-- Inherit tags, descriptions, and meta fields from upstream models
+- データベース（または `catalog.json`）には存在するが、YAML には存在しない列を追加します。
+- データベースに存在しない列を削除します（他のステップと併用する場合はオプションです）。
+- 列を並べ替えます（並べ替え設定と組み合わせる場合はオプションです。下記参照）。
+- 上流モデルからタグ、説明、メタフィールドを継承します。
 
 ```bash
 dbt-osmosis yaml document [--project-dir] [--profiles-dir] [--target] [--fqn ...] [--dry-run] [--check]
 ```
 
-Options often used:
+よく使用されるオプション:
 
-- `--force-inherit-descriptions` to override *existing* descriptions if they are placeholders
-- `--use-unrendered-descriptions` so that you can propagate Jinja-based docs (like `{{ doc(...) }}`)
-- `--skip-add-columns`, `--skip-add-data-types`, `--skip-merge-meta`, `--skip-add-tags`, etc., if you want to limit changes
-- `--synthesize` to autogenerate missing documentation with ChatGPT/OpenAI (see *Synthesis* below)
+- `--force-inherit-descriptions` : 既存の説明がプレースホルダーの場合に上書きします。
+- `--use-unrendered-descriptions` : Jinja ベースのドキュメント (`{{ doc(...) }}` など) を継承できるようにします。
+- `--skip-add-columns`、`--skip-add-data-types`、`--skip-merge-meta`、`--skip-add-tags` など: 変更を制限したい場合。
+- `--synthesize` : ChatGPT/OpenAI を使用して不足しているドキュメントを自動生成します (下記の *Synthesis* を参照)
 
 ### Refactor
 
-The **combination** of both `organize` and `document` in the correct order. Typically the recommended command to run:
+`organize` と `document` の両方を正しい順序で **組み合わせ** します。通常、実行が推奨されるコマンドは次のとおりです。
 
-- Creates or moves YAML files to match your `dbt_project.yml` rules
-- Ensures columns are up to date with warehouse or catalog
-- Inherits descriptions and metadata
-- Reorders columns if desired
+- `dbt_project.yml` ルールに一致するように YAML ファイルを作成または移動します。
+- ウェアハウスまたはカタログの列が最新であることを確認します。
+- 説明とメタデータを継承します。
+- 必要に応じて列を並べ替えます。
 
 ```bash
 dbt-osmosis yaml refactor [--project-dir] [--profiles-dir] [--target] [--fqn ...] [--dry-run] [--check]
 ```
 
-Options often used:
+よく使用されるオプション:
 
 - `--auto-apply`
-- `--force-inherit-descriptions`, `--use-unrendered-descriptions`
-- `--skip-add-data-types`, `--skip-add-columns`, etc.
-- `--synthesize` to autogenerate missing documentation with ChatGPT/OpenAI
+- `--force-inherit-descriptions`、`--use-unrendered-descriptions`
+- `--skip-add-data-types`、`--skip-add-columns` など
+- `--synthesize` は ChatGPT/OpenAI で不足しているドキュメントを自動生成します
 
-### Commonly Used Flags in YAML Commands
+### YAMLコマンドでよく使用されるフラグ
 
-- `--fqn=staging.some_subfolder` to limit to a particular subfolder or results of dbt ls
-- `--check` to fail your CI if dbt-osmosis *would* make changes
-- `--dry-run` to preview changes without writing them to disk
-- `--catalog-path=target/catalog.json` to avoid live queries
-- `--disable-introspection` to skip warehouse queries entirely
-- `--auto-apply` to skip manual confirmation for file moves
+- `--fqn=staging.some_subfolder` ：特定のサブフォルダまたは dbt ls の結果のみを対象とする
+- `--check` ：dbt-osmosis が変更を加える可能性がある場合にCIを失敗させる
+- `--dry-run` ：変更内容をディスクに書き込まずにプレビューする
+- `--catalog-path=target/catalog.json` ：ライブクエリを回避する
+- `--disable-introspection` ：ウェアハウスクエリを完全にスキップする
+- `--auto-apply` ：ファイル移動の手動確認をスキップする
 
-### Synthesis (Experimental)
+### Synthesis （試験的）
 
-If you pass the `--synthesize` flag to `dbt-osmosis yaml refactor` (or `document`), dbt-osmosis will attempt to **generate missing documentation** using OpenAI's API (like ChatGPT). You will need to have installed with the `[openai]` extra:
+`dbt-osmosis yaml refactor`（または`document`）に`--synthesize`フラグを渡すと、dbt-osmosisはOpenAIのAPI（ChatGPTなど）を使用して**不足しているドキュメントを生成**しようとします。`[openai]`エクストラがインストールされている必要があります。
 
 ```bash
 pip install "dbt-osmosis[openai]"
 ```
 
-This feature can make large-scale doc scaffolding easier, but always review and refine any auto-generated text!
+この機能により、大規模なドキュメントのスキャフォールディングが容易になりますが、自動生成されたテキストは常に確認して改良してください。
 
 ## SQL
 
-These commands let you compile or run SQL snippets (including Jinja) directly:
+これらのコマンドを使用すると、SQL スニペット (Jinja を含む) を直接コンパイルまたは実行できます:
 
 ### Run
 
-Runs a SQL statement or a dbt Jinja-based query.
+SQL ステートメントまたは dbt Jinja ベースのクエリを実行します。
 
 ```bash
 dbt-osmosis sql run "select * from {{ ref('my_model') }} limit 50"
 ```
 
-Returns results in tabular format to stdout. Use `--threads` to run multiple queries in parallel (though typically you’d run one statement at a time).
+結果は表形式で標準出力に返されます。複数のクエリを並列実行するには `--threads` を使用します（通常は一度に1つのステートメントを実行します）。
 
 ### Compile
 
-Compiles a SQL statement (including Jinja) but doesn’t run it. Useful for quickly validating macros, refs, or Jinja logic:
+SQL文（Jinjaを含む）をコンパイルしますが、実行はしません。マクロ、参照、Jinjaロジックを素早く検証するのに便利です。
 
 ```bash
 dbt-osmosis sql compile "select * from {{ ref('my_model') }}"
 ```
 
-Prints the compiled SQL to stdout.
+コンパイルされた SQL を stdout に出力します。
 
 ## Workbench
 
-Launches a [Streamlit](https://streamlit.io/) application that:
+以下の機能を備えた [Streamlit](https://streamlit.io/) アプリケーションを起動します。
 
-- Lets you explore and run queries against your dbt models in a REPL-like environment
-- Provides side-by-side compiled SQL
-- Offers real-time iteration on queries
+- REPL のような環境で、dbt モデルを探索およびクエリ実行できます。
+- 並列コンパイルされた SQL を提供します。
+- クエリのリアルタイム反復処理を提供します。
 
 ```bash
 dbt-osmosis workbench [--project-dir] [--profiles-dir] [--host] [--port]

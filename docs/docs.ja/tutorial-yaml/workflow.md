@@ -1,21 +1,21 @@
 ---
 sidebar_position: 5
 ---
-# Workflow
+# ワークフロー
 
-## YAML Files
+## YAML ファイル
 
-dbt-osmosis **manages** your YAML files in a **declarative** manner based on the configuration in your `dbt_project.yml`. In many cases, you don’t even have to manually create YAML files; dbt-osmosis will generate them on your behalf if they don’t exist. Once established, any changes you make to these config rules are automatically enforced—dbt-osmosis will move or merge YAML files accordingly.
+dbt-osmosis は、`dbt_project.yml` の設定に基づいて、**宣言的な**方法で YAML ファイルを **管理** します。多くの場合、YAML ファイルを手動で作成する必要はありません。YAML ファイルが存在しない場合は、dbt-osmosis が自動的に生成します。一度設定ルールが確立されると、変更内容は自動的に適用され、dbt-osmosis がそれに応じて YAML ファイルを移動またはマージします。
 
 ### Sources
 
-By default, **dbt-osmosis** watches your sources from the **dbt manifest**. If you declare specific source paths under `vars: dbt-osmosis: sources`, dbt-osmosis can:
+デフォルトでは、**dbt-osmosis** は **dbt マニフェスト** からソースを監視します。`vars: dbt-osmosis: sources` で特定のソースパスを宣言すると、dbt-osmosis は次の処理を実行できます。
 
-- **Create** those YAML files if they don’t exist yet (bootstrapping).
-- **Synchronize** them with the **actual** database schema (pulling in missing columns unless you specify `--skip-add-source-columns`).
-- **Migrate** them if you change where they’re supposed to live (e.g., if you update `path: "some/new/location.yml"` in `dbt_project.yml`, dbt-osmosis will move it).
+- 対象の YAML ファイルがまだ存在しない場合は、**作成** します（ブートストラップ）。
+- 対象の YAML ファイルを **実際の** データベーススキーマと**同期** します（`--skip-add-source-columns` を指定しない限り、不足している列を取得します）。
+- 対象の YAML ファイルの保存場所が変更された場合は、**移行** します（例: `dbt_project.yml` で `path: "some/new/location.yml"` を更新した場合、dbt-osmosis はそれを移動します）。
 
-**Key benefit**: You never have to scaffold source YAML by hand. Merely define the path under `vars: dbt-osmosis:` (and optionally a custom schema). If your source changes (columns, new tables), dbt-osmosis can detect and update the YAML to match.
+**主なメリット**: YAML ソースファイルを手動でスキャフォールディングする必要がなくなります。 `vars: dbt-osmosis:` の下にパスを定義するだけです（オプションでカスタムスキーマも指定できます）。ソースが変更された場合（列や新しいテーブルが追加された場合）、dbt-osmosis はそれに応じて YAML を更新します。
 
 ```yaml title="dbt_project.yml"
 vars:
@@ -29,7 +29,7 @@ vars:
 
 ### Models
 
-Similarly, **models** are managed based on your `+dbt-osmosis` directives in `dbt_project.yml`. For each folder (or subfolder) of models:
+同様に、**モデル**は`dbt_project.yml`の`+dbt-osmosis`ディレクティブに基づいて管理されます。モデルの各フォルダ（またはサブフォルダ）について、以下の手順を実行します:
 
 ```yaml title="dbt_project.yml"
 models:
@@ -47,40 +47,40 @@ seeds:
     +dbt-osmosis: "_schema.yml"
 ```
 
-When you run `dbt-osmosis yaml` commands (like `refactor`, `organize`, `document`):
+`dbt-osmosis yaml` コマンド（`refactor`、`organize`、`document` など）を実行すると、次のようになります。
 
-- **Missing** YAML files are automatically **bootstrapped**.
-- dbt-osmosis merges or updates any **existing** ones.
-- If you rename or move a model to a different folder (and thus a different `+dbt-osmosis` rule), dbt-osmosis merges or moves the corresponding YAML to match.
+- **不足している** YAML ファイルは自動的に **ブートストラップ** されます。
+- dbt-osmosis は **既存の** YAML ファイルをマージまたは更新します。
+- モデルの名前を変更したり、別のフォルダに移動したりした場合（つまり、`+dbt-osmosis` ルールが変更される場合）、dbt-osmosis は対応する YAML をマージまたは移動して一致させます。
 
-Because dbt-osmosis enforces your declared file paths, you **won’t** inadvertently end up with duplicate or out-of-date YAML references.
+dbt-osmosis は宣言されたファイルパスを適用するため、誤って重複した YAML 参照や古い YAML 参照が作成されることは **ありません**。
 
 ---
 
-## Running dbt-osmosis
+## dbt-osmosis の実行
 
-Whether you are focusing on daily doc updates or large-scale refactors, dbt-osmosis can be triggered in **three** common ways. You can pick whichever method suits your team’s workflow best; they’re not mutually exclusive.
+日々のドキュメント更新に重点を置く場合でも、大規模なリファクタリングに重点を置く場合でも、dbt-osmosis は **3** つの一般的な方法で起動できます。チームのワークフローに最適な方法を選択してください。これらの方法は相互に排他的ではありません。
 
-### 1. On-demand ⭐️
+### 1. オンデマンド ⭐️
 
-**Simplest approach**: occasionally run dbt-osmosis when you want to tidy things up or ensure docs are current. For instance:
+**最もシンプルなアプローチ**：整理整頓したいときやドキュメントを最新にしたいときに、dbt-osmosis を時々実行します。例えば：
 
 ```bash
 # Example: refactor and see if changes occur
 dbt-osmosis yaml refactor --target prod --check
 ```
 
-**Recommended usage**:
+**推奨される使用方法**:
 
-- **Monthly or quarterly** “cleanups”
-- Ad hoc runs on a **feature branch** (review & merge the changes if they look good)
-- Let developers manually run it whenever they have significantly changed schemas
+- **月次または四半期ごと**の「クリーンアップ」
+- **フィーチャーブランチ**でアドホック実行（変更内容を確認し、問題がなければマージする）
+- 開発者がスキーマを大幅に変更した際に手動で実行できるようにする
 
-A single execution often yields **substantial** value by updating or reorganizing everything according to your rules.
+一度の実行で、ルールに従ってすべての内容を更新または再編成できるため、**大きな**価値が得られることがよくあります。
 
-### 2. Pre-commit hook ⭐️⭐️
+### 2. コミット前フック ⭐️⭐️
 
-To **automate** doc and schema alignment, you can add dbt-osmosis to your team’s **pre-commit** hooks. It will run automatically whenever you commit any `.sql` files in, say, `models/`.
+ドキュメントとスキーマの整合を**自動化**するには、チームの**コミット前**フックにdbt-osmosisを追加できます。これは、例えば`models/`にある`.sql`ファイルをコミットするたびに自動的に実行されます。
 
 ```yaml title=".pre-commit-config.yaml"
 repos:
@@ -94,16 +94,16 @@ repos:
         additional_dependencies: [dbt-<adapter>]
 ```
 
-**Pro**: Docs never go stale because every commit updates them.
-**Con**: Slight overhead on each commit, but typically manageable if you filter only changed models.
+**利点**: コミットごとにドキュメントが更新されるため、ドキュメントが古くなることはありません。
+**欠点**: コミットごとに若干のオーバーヘッドが発生しますが、変更されたモデルのみをフィルタリングすれば通常は管理可能です。
 
 ### 3. CI/CD ⭐️⭐️⭐️
 
-You can also integrate dbt-osmosis into your **continuous integration** pipeline. For example, a GitHub Action or a standalone script might:
+dbt-osmosis を **継続的インテグレーション** パイプラインに統合することもできます。たとえば、GitHub Action やスタンドアロンスクリプトで次のような操作を実行できます。
 
-1. Clone your repo into a CI environment.
-2. Run `dbt-osmosis yaml refactor`.
-3. Commit any resulting changes back to a branch or open a pull request.
+1. リポジトリを CI 環境にクローンします。
+2. `dbt-osmosis yaml refactor` を実行します。
+3. 結果として得られた変更をブランチにコミットするか、プルリクエストを開きます。
 
 ```bash title="example.sh"
 git clone https://github.com/my-org/my-dbt-project.git
@@ -117,16 +117,16 @@ git push origin -f
 gh pr create
 ```
 
-**Pros**:
+**メリット**:
 
-- Automated and **reviewable** in a PR.
-- Takes the load off dev machines by running it in a controlled environment.
+- 自動化されており、PR で **レビュー可能** です。
+- 制御された環境で実行することで、開発マシンの負荷を軽減します。
 
-**Cons**:
+**デメリット**:
 
-- Requires some CI setup.
-- Devs must remember to review and merge the PR.
+- CI の設定が必要です。
+- 開発者は PR のレビューとマージを忘れないようにする必要があります。
 
----
+- ---
 
-**In summary**, dbt-osmosis fits a wide range of workflows. Whether you run it on-demand, as a pre-commit hook, or integrated into a CI pipeline, you’ll enjoy a consistent, automated approach to maintaining and updating your dbt YAML files for both **sources** and **models**.
+**まとめ**、dbt-osmosis は幅広いワークフローに適合します。オンデマンドで実行する場合でも、コミット前のフックとして実行する場合でも、CI パイプラインに統合する場合でも、**ソース** と **モデル** の両方の dbt YAML ファイルを、一貫性のある自動化されたアプローチで維持および更新できます。

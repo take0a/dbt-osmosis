@@ -1,24 +1,24 @@
 ---
 sidebar_position: 1
 ---
-# dbt-osmosis Intro
+# dbt-osmosis 入門
 
-Let's discover **dbt-osmosis** in less than 5 minutes.
+5分以内で**dbt-osmosis** の使い方を学びましょう。
 
-## Getting Started
+## はじめに
 
-Get started by **running dbt-osmosis**.
+まずは**dbt-osmosis**を実行してください。
 
-### What you'll need
+### 必要なもの
 
 - [Python](https://www.python.org/downloads/) (3.10+)
 - [dbt](https://docs.getdbt.com/docs/core/installation) (1.8.0+)
-- or [uv](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer)
-- An existing dbt project (or you can play with it using [jaffle shop](https://github.com/dbt-labs/jaffle_shop_duckdb))
+- または [uv](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer)
+- 既存の dbt プロジェクト (または [jaffle shop](https://github.com/dbt-labs/jaffle_shop_duckdb) を使って試してみることも可能)
 
-## Configure dbt-osmosis
+## dbt-osmosis の設定
 
-Add the following to your `dbt_project.yml` file. This example configuration tells dbt-osmosis that for every model in your project, there should exist a YAML file in the same directory with the same name as the model prefixed with an underscore. For example, if you have a model named `my_model` then there should exist a YAML file named `_my_model.yml` in the same directory as the model. The configuration is extremely flexible and can be used to declaratively organize your YAML files in any way you want as you will see later.
+`dbt_project.yml` ファイルに以下のコードを追加します。この設定例では、プロジェクト内のすべてのモデルについて、同じディレクトリ内に、モデル名にアンダースコアを先頭に付けた YAML ファイルが存在することを dbt-osmosis に指示します。例えば、`my_model` という名前のモデルがある場合、そのモデルと同じディレクトリ内に `_my_model.yml` という名前の YAML ファイルが存在する必要があります。この設定は非常に柔軟で、後ほど説明するように、YAML ファイルを任意の方法で宣言的に構成できます。
 
 ```yaml title="dbt_project.yml"
 models:
@@ -29,20 +29,20 @@ seeds:
     +dbt-osmosis: "_schema.yml"
 ```
 
-## Run dbt-osmosis
+## dbt-osmosis を実行します
 
-If using uv(x):
+uv(x) を使用する場合:
 
 ```bash
 uvx --with='dbt-<adapter>==1.9.0' dbt-osmosis yaml refactor
 ```
 
-Or, if installed in your Python environment:
+または、Python 環境にインストールされている場合:
 
 ```bash
 dbt-osmosis yaml refactor
 ```
 
-Run this command from the root of your dbt project. Ensure your git repository is clean before running. Replace `<adapter>` with the name of your dbt adapter (e.g. `snowflake`, `bigquery`, `redshift`, `postgres`, `athena`, `spark`, `trino`, `sqlite`, `duckdb`, `oracle`, `sqlserver`).
+このコマンドを dbt プロジェクトのルートから実行してください。実行前に Git リポジトリがクリーンであることを確認してください。`<adapter>` を dbt アダプタの名前に置き換えてください（例: `snowflake`、`bigquery`、`redshift`、`postgres`、`athena`、`spark`、`trino`、`sqlite`、`duckdb`、`oracle`、`sqlserver`）。
 
-Watch the magic unfold. ✨
+魔法が繰り広げられるのをご覧ください。✨

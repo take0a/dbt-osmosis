@@ -1,175 +1,175 @@
 ---
 sidebar_position: 4
 ---
-# Selection
+# 選択
 
-When you run **dbt-osmosis** commands like `yaml refactor`, `yaml organize`, or `yaml document`, you typically want to narrow the scope to **some** subset of models or sources in your project. This helps you:
+`yaml refactor`、`yaml organizing`、`yaml document` などの **dbt-osmosis** コマンドを実行する際、通常はプロジェクト内のモデルやソースの **一部** にスコープを絞り込む必要があります。これにより、以下のことが可能になります。
 
-- Focus on a subset of changes rather than the entire project.
-- Speed up refactoring or documentation runs.
-- Reduce noise or risk when iterating incrementally.
+- プロジェクト全体ではなく、変更のサブセットに焦点を当てることができます。
+- リファクタリングやドキュメント作成の実行速度が向上します。
+- 段階的なイテレーションにおけるノイズやリスクを軽減できます。
 
-dbt-osmosis provides **two** major strategies for doing this:
+dbt-osmosis は、これを実行するための**2つの**主要な戦略を提供します:
 
-1. **Positional Selectors** (recommended)
-2. **`--fqn` Flag** (for advanced users or special cases)
+1. **位置セレクタ** (推奨)
+2. **`--fqn` フラグ** (上級ユーザーまたは特殊なケース向け)
 
-## 1. Positional Selectors
+## 1. 位置セレクター
 
-**Positional selectors** are the **non-flag arguments** you provide after the command. They’re interpreted as **paths or model names**. The underlying logic tries to match each positional argument to:
+**位置セレクター** は、コマンドの後に指定する **フラグ以外の引数** です。**パスまたはモデル名** として解釈されます。基盤となるロジックでは、各位置引数を以下のものと照合しようとします。
 
-- A model name (like `stg_customers`)
-- A file path (like `models/staging/stg_customers.sql`)
-- A directory path (like `models/staging`)
-- A file glob (like `marts/**/*.sql`)
+- モデル名 (例: `stg_customers`)
+- ファイルパス (例: `models/staging/stg_customers.sql`)
+- ディレクトリパス (例: `models/staging`)
+- ファイルグロブ (例: `marts/**/*.sql`)
 
-In other words, anything that isn’t prefixed with `--` is treated as a *positional path or node name* that dbt-osmosis will attempt to match against your project.
+つまり、`--` で始まっていないものはすべて、dbt-osmosis がプロジェクトに対して照合を試みる *位置パスまたはノード名* として扱われます。
 
-### Example Commands
+### コマンド例
 
 ```bash
 # Select all models in the models/staging directory
 dbt-osmosis yaml refactor models/staging
 ```
 
-In this case, dbt-osmosis processes **all** `.sql` files recognized as dbt models in `models/staging`. Similarly:
+この場合、dbt-osmosis は `models/staging` 内の dbt モデルとして認識される **すべての** `.sql` ファイルを処理します。同様に、次のようになります:
 
 ```bash
 # Select only one model if the name is stg_customers and it exists
 dbt-osmosis yaml refactor stg_customers
 ```
 
-dbt-osmosis looks for a node with the **exact** name `stg_customers`. If found, it processes **just** that single model. If the name doesn’t match a known node, dbt-osmosis checks if there’s a path or file called `stg_customers`. If that fails, no models are selected.
+dbt-osmosis は、`stg_customers` という **正確な** 名前を持つノードを検索します。見つかった場合、そのモデルのみを処理します。名前が既知のノードと一致しない場合、dbt-osmosis は `stg_customers` というパスまたはファイルが存在するかどうかを確認します。それが見つからない場合、モデルは選択されません。
 
-#### Using Globs
+#### グロブの使用
 
-If your shell supports wildcards or recursive globs:
+シェルがワイルドカードまたは再帰グロブをサポートしている場合:
 
 ```bash
 # Recursively select all .sql models in marts/ subdirectories
 dbt-osmosis yaml refactor marts/**/*.sql
 ```
 
-This is equivalent to selecting every `.sql` file under `marts/` at **any** nested level.
+これは、`marts/` の下にある **任意の** ネスト レベルのすべての `.sql` ファイルを選択することと同じです。
 
-#### Absolute Paths
+#### 絶対パス
 
-You can also supply **absolute** or relative paths. For example:
+**絶対**パスまたは相対パスを指定することもできます。例:
 
 ```bash
 dbt-osmosis yaml refactor /full/path/to/my_project/models/staging/*.sql
 ```
 
-If dbt-osmosis recognizes those `.sql` files as part of your current dbt project, it will include them.
+dbt-osmosis がこれらの `.sql` ファイルを現在の dbt プロジェクトの一部として認識した場合は、それらを含めます。
 
-### How dbt-osmosis Interprets Positional Selectors
+### dbt-osmosis による位置セレクタの解釈方法
 
-1. **Exact Node Name Check**: If the positional argument **directly matches** a known model name (like `stg_customers`), dbt-osmosis picks that node.
-2. **File or Directory Check**: If the argument is a valid path (relative or absolute), dbt-osmosis includes all recognized `.sql` models beneath it (or the file itself if it’s a single `.sql`).
-3. **Glob Expansion**: If your shell expands the glob, dbt-osmosis picks each resulting path that maps to a dbt model.
+1. **正確なノード名チェック**: 位置引数が既知のモデル名（`stg_customers` など）と **直接一致** する場合、dbt-osmosis はそのノードを選択します。
+2. **ファイルまたはディレクトリのチェック**: 引数が有効なパス（相対パスまたは絶対パス）の場合、dbt-osmosis はその下にある認識済みのすべての `.sql` モデル（単一の `.sql` の場合はファイル自体）を含めます。
+3. **glob 展開**: シェルが glob を展開する場合、dbt-osmosis は dbt モデルにマッピングされる結果の各パスを選択します。
 
-This approach is **intuitive**, typically what you’d want for partial refactors, and is less error-prone than advanced flags.
+このアプローチは **直感的** で、通常は部分的なリファクタリングに適しており、高度なフラグよりもエラーが発生しにくくなります。
 
 ---
 
-## 2. The `--fqn` Flag
+## 2. `--fqn`フラグ
 
 :::caution Caution
-This may be **deprecated** in the future. We recommend positional selectors first.
+これは将来**非推奨**になる可能性があります。まずは位置セレクターの使用をお勧めします。
 :::
 
-The **`--fqn`** flag provides an alternative approach. An **FQN** (fully qualified name) in dbt typically includes:
+**`--fqn`** フラグは代替アプローチを提供します。dbt の **FQN** (完全修飾名) には通常、次の情報が含まれます:
 
-- The project name
-- The resource type (`model`, `source`, or `seed`)
-- Subfolders or packages leading to the node
-- The final node name
+- プロジェクト名
+- リソースタイプ (`model`、`source`、または `seed`)
+- ノードにつながるサブフォルダまたはパッケージ
+- 最終的なノード名
 
-In dbt-osmosis, we **omit** the project name and resource type segments, focusing only on the latter parts of the FQN. For instance, if `dbt ls` returns:
+dbt-osmosis では、プロジェクト名とリソースタイプのセグメントを**省略** し、FQN の後半部分のみに注目します。例えば、`dbt ls` が次の結果を返すとします。
 
 ```
 my_project.model.staging.salesforce.contacts
 ```
 
-You could specify:
+次のように指定できます:
 
 ```bash
 dbt-osmosis yaml refactor --fqn=staging.salesforce.contacts
 ```
 
-And dbt-osmosis would match precisely that node. Or:
+そして、dbt-osmosis はまさにそのノードに一致します。または:
 
 ```bash
 dbt-osmosis yaml refactor --fqn=staging.salesforce
 ```
 
-This would select **all** nodes under `staging.salesforce.*`, effectively everything in the `staging/salesforce` sub-tree.
+これにより、`staging.salesforce.*` の下の **すべての** ノードが選択され、実質的には `staging/salesforce` サブツリー内のすべてが選択されます。
 
-### Why Use `--fqn`?
+### `--fqn` を使う理由
 
-- **Precise FQN-based** selection.
-- If you’re comfortable with dbt’s concept of FQNs, it can be simpler to copy/paste from `dbt ls`.
-- **Partial segments**: You might not remember the exact file path, but you know the dbt FQN you want.
+- **正確な FQN ベース** の選択。
+- dbt の FQN の概念に慣れている場合は、`dbt ls` からコピー/ペーストする方が簡単です。
+- **部分セグメント**: 正確なファイルパスは覚えていなくても、必要な dbt FQN はわかっている場合があります。
 
-### Example
+### 例
 
 ```bash
 dbt-osmosis yaml refactor --fqn=marts.sales.customers
 ```
 
-If your project is named `my_project`, dbt-osmosis internally interprets that as `my_project.model.marts.sales.customers`—**only** that single model. Or:
+プロジェクト名が「my_project」の場合、dbt-osmosis は内部的にそれを「my_project.model.marts.sales.customers」、つまり**そのモデルのみ** として解釈します。または、
 
 ```bash
 dbt-osmosis yaml refactor --fqn=staging.salesforce
 ```
 
-It selects **any** model where the FQN starts with `staging.salesforce`, capturing all models in your `staging/salesforce/` subfolder.
+これは、FQN が `staging.salesforce` で始まる **任意の** モデルを選択し、`staging/salesforce/` サブフォルダー内のすべてのモデルをキャプチャします。
 
-### Edge Cases / Limitations
+### エッジケース / 制限事項
 
-- We assume you’re only dealing with models or sources from the **current** project (not upstream packages).
-- If multiple subfolders share the same partial FQN, you might get more matches than expected—though that’s relatively uncommon if your dbt naming is well-structured.
-
----
-
-## Which Should I Use?
-
-**For 90% of use cases**, **positional selectors** are easiest and more future-proof, since `--fqn` may be deprecated. Simply specifying the path or the node name is generally enough. However, if you have advanced use cases or find it more convenient to copy/paste FQNs from `dbt ls`, then `--fqn` remains a viable option.
+- **現在の** プロジェクトのモデルまたはソースのみを対象としています（アップストリームパッケージは対象外です）。
+- 複数のサブフォルダで同じ部分的な FQN が共有されている場合、予想よりも多くの一致が見つかる可能性があります。ただし、dbt の命名規則が適切に構成されている場合は、このようなケースは比較的まれです。
 
 ---
 
-## Putting It All Together
+## どちらを使うべきですか？
 
-Here’s a quick run-down of typical usage patterns:
+**ユースケースの90%**において、**位置セレクタ**が最も簡単で将来性も高くなります。`--fqn`は廃止される可能性があるためです。通常は、パスまたはノード名を指定するだけで十分です。ただし、高度なユースケースがある場合や、`dbt ls`からFQNをコピー＆ペーストする方が便利だと感じる場合は、`--fqn`も有効な選択肢となります。
 
-- **One folder at a time**:
+---
+
+## まとめ
+
+一般的な使用パターンを簡単に説明します。
+
+- **一度に1つのフォルダ**:
 
   ```bash
   dbt-osmosis yaml refactor models/staging
   ```
 
-- **One specific model**:
+- **特定のモデル**:
 
   ```bash
   dbt-osmosis yaml document stg_customers
   ```
 
-- **All .sql files in `marts`**:
+- **`marts` 内のすべての .sql ファイル**:
 
   ```bash
   dbt-osmosis yaml organize marts/*.sql
   ```
 
-- **A partial FQN for multiple subfolders**:
+- **複数のサブフォルダーの部分的な FQN**:
 
   ```bash
   dbt-osmosis yaml refactor --fqn=staging
   ```
 
-  (selects *all* staging models)
+  (すべてのステージング モデルを選択)
 
-Regardless of your approach, dbt-osmosis will do its usual work of **refactoring** or **documenting** or **organizing** whichever subset of models (and sources, if relevant) match your selection criteria.
+どのようなアプローチを採用しても、dbt-osmosis は、選択基準に合致するモデル（および該当する場合はソース）のサブセットに対して、**リファクタリング**、**ドキュメント化**、または**整理**といった通常の作業を実行します。
 
 ---
 
-**In summary**, the **Selection** mechanism in dbt-osmosis is flexible enough to handle both straightforward file-based filters and advanced FQN-based filters. Use **positional selectors** for most tasks, and consider `--fqn` if you have a specific workflow that benefits from it. This ensures you only run dbt-osmosis on **exactly** the nodes you care about.
+**まとめると**、dbt-osmosis の**選択** メカニズムは、単純なファイルベースのフィルターと高度な FQN ベースのフィルターの両方を処理できるほど柔軟です。ほとんどのタスクでは**位置セレクタ** を使用し、特定のワークフローでこの機能が有効な場合は `--fqn` の使用を検討してください。これにより、dbt-osmosis を必要なノードのみで実行できるようになります。

@@ -1,15 +1,15 @@
 ---
 sidebar_position: 2
 ---
-# Context Variables
+# コンテキスト変数
 
-dbt-osmosis provides three primary variables—`{model}`, `{node}`, and `{parent}`—that can be referenced in your `+dbt-osmosis:` path configurations. These variables let you build **powerful** and **dynamic** rules for where your YAML files should live, all while staying **DRY** (don’t repeat yourself).
+dbt-osmosis は、`+dbt-osmosis:` パス設定で参照できる 3 つの主要な変数（`{model}`、`{node}`、`{parent}`）を提供します。これらの変数を使用することで、YAML ファイルの配置場所に関する **強力** かつ **動的な** ルールを構築でき、**DRY**（don't repeat yourself）** という原則を遵守できます。
 
 ## `{model}`
 
-This variable expands to the **model name** being processed. If your model file is named `stg_marketo__leads.sql`, `{model}` will be `stg_marketo__leads`.
+この変数は、処理対象の**モデル名**に展開されます。モデルファイルの名前が `stg_marketo__leads.sql` の場合、`{model}` は `stg_marketo__leads` になります。
 
-**Usage Example**
+**使用例**
 
 ```yaml title="dbt_project.yml"
 models:
@@ -24,26 +24,26 @@ models:
       +dbt-osmosis: "some/deeply/nested/path/{model}.yml"
 ```
 
-### Why Use `{model}`?
+### `{model}` を使う理由
 
-- **One-file-per-model** strategy: `_{model}.yml` => `_stg_marketo__leads.yml`
-- **Direct mapping** of model name to YAML file, making it easy to find
-- **Simple** approach when you want each model’s metadata stored separately
+- **モデルごとに1ファイル**戦略：`_{model}.yml` => `_stg_marketo__leads.yml`
+- モデル名をYAMLファイルに**直接マッピング**することで、簡単に見つけることができます
+- 各モデルのメタデータを個別に保存したい場合の**シンプルな**アプローチ
 
 ## `{node}`
 
-`{node}` is a **powerful** placeholder giving you the entire node object as it appears in the manifest. This object includes details like:
+`{node}` は、マニフェストに表示されるノード オブジェクト全体を提供する **強力な** プレースホルダーです。このオブジェクトには、次のような詳細が含まれます。
 
-- `node.fqn`: A list uniquely identifying the node (e.g., `["my_project", "contacts"]`)
-- `node.resource_type`: `model`, `source`, or `seed`
-- `node.language`: Typically `"sql"`
-- `node.config[materialized]`: The model’s materialization (e.g. `"table"`, `"view"`, `"incremental"`)
-- `node.tags`: A list of tags you assigned in your model config
-- `node.name`: The name of the node (same as `{model}`, but you get it as `node.name`)
+- `node.fqn`: ノードを一意に識別するリスト (例: `["my_project", "contacts"]`)
+- `node.resource_type`: `model`、`source`、または `seed`
+- `node.language`: 通常は `"sql`
+- `node.config[materialized]`: モデルのマテリアライズ (例: `"table"`、`"view"`、`"incremental"`)
+- `node.tags`: モデル設定で割り当てたタグのリスト
+- `node.name`: ノードの名前 (`{model}` と同じですが、`node.name` として取得されます)
 
-With this variable, you can reference **any** node attribute directly in your file path.
+この変数を使用すると、ファイルパス内の **任意の** ノード属性を直接参照できます。
 
-**Usage Example**
+**使用例**
 
 ```yaml title="dbt_project.yml"
 models:
@@ -59,45 +59,45 @@ models:
       +dbt-osmosis: "{node.config[materialized]}/{node.tags[0]}/{node.name}.yml"
 ```
 
-### Creative Use Cases
+### クリエイティブなユースケース
 
-1. **Sort YAML by materialization**
+1. **YAMLをマテリアライズ順に並べ替える**
 
    ```yaml
    +dbt-osmosis: "{node.config[materialized]}/{model}.yml"
    ```
 
-   If your model is a `table`, the file path might become `table/stg_customers.yml`.
+   モデルが `table` の場合、ファイルパスは `table/stg_customers.yml` になります。
 
-2. **Sort YAML by a specific tag** (you could use `meta` as well)
+2. **YAML を特定のタグで並べ替える** (`meta` も使用できます)
 
    ```yaml
    +dbt-osmosis: "{node.tags[0]}/{model}.yml"
    ```
 
-   If the first tag is `finance`, you’d get `finance/my_model.yml`.
+   最初のタグが `finance` の場合、`finance/my_model.yml` が作成されます。
 
-3. **Split by subfolders**
+3. **サブフォルダに分割**
 
    ```yaml
    +dbt-osmosis: "{node.fqn[-2]}/{model}.yml"
    ```
 
-   This references the “second-last” element in your FQN array, often the subfolder name.
+   これは、FQN配列の「最後から2番目」の要素（通常はサブフォルダ名）を参照します。
 
-4. **Multi-level grouping**
+4. **複数レベルのグループ化**
 
    ```yaml
    +dbt-osmosis: "{node.resource_type}/{node.config[materialized]}/{node.name}.yml"
    ```
 
-   Group by whether it’s a model, source, or seed, *and* by its materialization.
+   モデル、ソース、シードのいずれか、そしてその実体化によってグループ化します。
 
-In short, `{node}` is extremely flexible if you want to tailor your YAML file structure to reflect deeper aspects of the model’s metadata.
+つまり、YAML ファイル構造をカスタマイズしてモデルのメタデータのより深い側面を反映させたい場合、`{node}` は非常に柔軟です。
 
 ## `{parent}`
 
-This variable represents the **immediate parent directory** of the **YAML file** that’s being generated, which typically aligns with the folder containing the `.sql` model file. For example, if you have:
+この変数は、生成される**YAMLファイル**の**直近の親ディレクトリ**を表します。これは通常、`.sql`モデルファイルを含むフォルダと一致します。例えば、次のような場合です:
 
 ```
 models/
@@ -106,9 +106,9 @@ models/
       opportunities.sql
 ```
 
-The `{parent}` for `opportunities.sql` is `salesforce`. Thus if you do `+dbt-osmosis: "{parent}.yml"`, you’ll end up with a single `salesforce.yml` in the `staging/salesforce/` folder (lumping all models in that folder together).
+`opportunities.sql` の `{parent}` は `salesforce` です。したがって、`+dbt-osmosis: "{parent}.yml"` と実行すると、`staging/salesforce/` フォルダ内に単一の `salesforce.yml` が作成されます（このフォルダ内のすべてのモデルがまとめられます）。
 
-**Usage Example**
+**使用例**
 
 ```yaml title="dbt_project.yml"
 models:
@@ -120,16 +120,16 @@ models:
       +dbt-osmosis: "{parent}.yml"
 ```
 
-### Why Use `{parent}`?
+### `{parent}` を使う理由
 
-- **Consolidated** YAML: All models in a given folder share a single YAML. For example, `staging/salesforce/salesforce.yml` for 2–3 “salesforce” models.
-- Great for **folder-based** org structures—like `staging/facebook_ads`, `staging/google_ads`—and you want a single file for each source’s staging models.
+- **統合** YAML: 特定のフォルダ内のすべてのモデルで単一の YAML を共有します。例えば、2～3 個の「salesforce」モデルの場合は `staging/salesforce/salesforce.yml` を使用します。
+- `staging/facebook_ads`、`staging/google_ads` のような **フォルダベース** の組織構造で、各ソースのステージングモデルごとに単一のファイルが必要な場合に最適です。
 
 ---
 
-## Putting It All Together
+## すべてをまとめる
 
-You can mix and match these variables for **fine-grained** control. Here’s a complex example that merges all:
+これらの変数を組み合わせることで、**きめ細かな**制御が可能になります。以下は、すべてを統合した複雑な例です。
 
 ```yaml
 models:
@@ -138,19 +138,19 @@ models:
       +dbt-osmosis: "{parent}/{node.config[materialized]}/{node.tags[0]}_{model}.yml"
 ```
 
-1. **`{parent}`** => Name of the immediate subfolder under `super_warehouse`.
-2. **`{node.config[materialized]}`** => Another subfolder named after the model’s materialization.
-3. **`{node.tags[0]}`** => A prefix in the filename, e.g. `marketing_` or `analytics_`.
-4. **`{model}`** => The actual model name for clarity.
+1. **`{parent}`** => `super_warehouse` 直下のサブフォルダの名前。
+2. **`{node.config[materialized]}`** => モデルの実体化に基づいて命名された別のサブフォルダ。
+3. **`{node.tags[0]}`** => ファイル名のプレフィックス（例：`marketing_` または `analytics_`）。
+4. **`{model}`** => わかりやすいように実際のモデル名。
 
-So if you have a model `super_warehouse/snapshots/payment_stats.sql` with `materialized='table'` and a first tag of `'billing'`, it might produce:
+つまり、`materialized='table'` で最初のタグが `'billing'` であるモデル `super_warehouse/snapshots/payment_stats.sql` がある場合、次のような結果が生成されます。
 
 ```
 super_warehouse/models/table/billing_payment_stats.yml
 ```
 
-This approach ensures your YAML files reflect **both** how your code is organized (folder structure) **and** the model’s metadata (materialization, tags, etc.), with minimal manual overhead.
+このアプローチにより、YAML ファイルはコードの編成方法（フォルダ構造）とモデルのメタデータ（マテリアライゼーション、タグなど）の両方を反映でき、手作業によるオーバーヘッドは最小限に抑えられます。
 
 ---
 
-**In summary**, **context variables** are the backbone of dbt-osmosis’s dynamic file routing system. With `{model}`, `{node}`, and `{parent}`, you can define a wide range of file layout patterns and rely on dbt-osmosis to keep everything consistent. Whether you choose a single YAML per model, a single YAML per folder, or a more exotic arrangement that depends on tags, materializations, or your node’s FQN, dbt-osmosis will automatically **organize** and **update** your YAMLs to match your declared config.
+**まとめると**、**コンテキスト変数**は dbt-osmosis の動的ファイルルーティングシステムの基盤です。`{model}`、`{node}`、`{parent}` を使用することで、幅広いファイルレイアウトパターンを定義し、dbt-osmosis がすべての一貫性を維持できます。モデルごとに 1 つの YAML、フォルダごとに 1 つの YAML、あるいはタグ、マテリアライゼーション、ノードの FQN に依存するより特殊な配置など、どのような場合でも、dbt-osmosis は宣言された構成に合わせて YAML を自動的に **整理** し、 **更新** します。

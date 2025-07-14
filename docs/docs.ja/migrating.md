@@ -1,9 +1,9 @@
 ---
 sidebar_position: 4
 ---
-# Migration Guide: Upgrading to dbt-osmosis 1.x.x
+# 移行ガイド: dbt-osmosis 1.x.x へのアップグレード
 
-## 1. Changes to `vars.dbt-osmosis` Structure
+## 1. `vars.dbt-osmosis` 構造の変更
 
 **Old** (pre–1.x.x):
 
@@ -29,13 +29,13 @@ vars:
       <kwargs for ruamel.yaml>
 ```
 
-### Why It’s Breaking
+### 問題の原因
 
-- Previously, users placed all source definitions **directly** under `vars.dbt-osmosis`.
-- Now, all source definitions **must** be nested under `vars.dbt-osmosis.sources`.
-- Other keys like `column_ignore_patterns` and `yaml_settings` now have **their own** top-level keys under `dbt-osmosis`, instead of living in the same dict.
+- 以前は、すべてのソース定義を `vars.dbt-osmosis` の直下に配置していました。
+- 今後は、すべてのソース定義を `vars.dbt-osmosis.sources` の直下にネストする必要があります。
+- `column_ignore_patterns` や `yaml_settings` などのキーは、同じ辞書内ではなく、`dbt-osmosis` の直下に **独自の** トップレベルキーを持つようになりました。
 
-**Migration**: If your `dbt_project.yml` currently has a line like:
+**移行**: `dbt_project.yml` に以下の行がある場合:
 
 ```yaml
 vars:
@@ -44,7 +44,7 @@ vars:
     # ...
 ```
 
-You must nest that under `sources:`:
+これを `sources:` の下にネストする必要があります。
 
 ```yaml
 vars:
@@ -56,15 +56,15 @@ vars:
 
 ---
 
-## 2. Renamed CLI Flags
+## 2. CLI フラグの名称変更
 
-The following CLI flags have been renamed for clarity:
+以下の CLI フラグは、分かりやすさを考慮して名称が変更されました。
 
 1. `--char-length` → `--string-length`
 2. `--numeric-precision` → `--numeric-precision-and-scale`
 3. `--catalog-file` → `--catalog-path`
 
-If you scripted these old flags, update them to the new names:
+これらの古いフラグをスクリプトに記述している場合は、新しい名前に更新してください。
 
 ```bash
 # Old (pre-1.x.x)
@@ -76,9 +76,9 @@ dbt-osmosis yaml refactor --string-length --catalog-path=target/catalog.json
 
 ---
 
-## 3. `--auto-apply` Prompt for File Moves
+## 3. ファイル移動時に `--auto-apply` プロンプトを表示
 
-In `1.x.x`, both `organize` and `refactor` commands may prompt you to confirm file moves if dbt-osmosis detects a restructure operation. By default, it asks:
+`1.x.x` では、dbt-osmosis が再構築操作を検出すると、`organize` コマンドと `refactor` コマンドの両方でファイル移動の確認を求めるプロンプトが表示されることがあります。デフォルトでは、以下のメッセージが表示されます。
 
 ```
 Apply the restructure plan? [y/N]
@@ -86,19 +86,19 @@ Apply the restructure plan? [y/N]
 
 ### `--auto-apply`
 
-- **Pass** `--auto-apply` to automatically confirm and avoid prompts (helpful in CI/CD).
-- If you do **not** pass `--auto-apply`, you will be prompted to confirm any file shuffle.
+- `--auto-apply` を **渡す** と、自動的に確認が行われ、プロンプトが表示されなくなります（CI/CD で役立ちます）。
+- `--auto-apply` を **渡さない** 場合、ファイルのシャッフルを行う際に確認プロンプトが表示されます。
 
-This is a **behavioral** change: previously, `organize`/`refactor` would just move files without an interactive confirmation step.
+これは **動作** の変更です。以前は、`organize`/`refactor` は対話的な確認ステップなしにファイルを移動していました。
 
 ---
 
-## 4. Seeds Must Have `+dbt-osmosis: <path>`
+## 4. シードには `+dbt-osmosis: <path>` が必要です
 
-To manage seeds with dbt-osmosis in `1.x.x`, you now **must** include a `+dbt-osmosis` directive in your `dbt_project.yml` seeds config. If it’s missing, dbt-osmosis raises an exception.
+`1.x.x` で dbt-osmosis を使用してシードを管理するには、`dbt_project.yml` シード設定に `+dbt-osmosis` ディレクティブを含めることが**必須** になりました。このディレクティブがない場合、dbt-osmosis は例外を発生させます。
 
-**Before** (pre-1.x.x), you might not have needed anything for seeds.
-**Now**:
+**以前** (1.x.x より前) では、シードには何も必要なかったかもしれません。
+**現在**:
 
 ```yaml
 seeds:
@@ -106,22 +106,22 @@ seeds:
     +dbt-osmosis: "_schema.yml"
 ```
 
-Without this, seeds are not properly recognized for YAML syncing, and an error occurs.
+これがないと、YAML 同期でシードが正しく認識されず、エラーが発生します。
 
 ---
 
-## 5. More Flexible Configuration Resolution
+## 5. より柔軟な設定解決
 
-dbt-osmosis `1.x.x` allows you to set options at multiple levels:
+dbt-osmosis `1.x.x` では、複数のレベルでオプションを設定できます。
 
-- **Global defaults / fallbacks** (via CLI flags)
-- **Folder-level** (the preferred, canonical approach via `+dbt-osmosis-options`)
-- **Node-level** (via `config(dbt_osmosis_options=...)` in the `.sql` file)
-- **Column-level** (via column `meta:` in the schema file)
+- **グローバルデフォルト / フォールバック** (CLI フラグ経由)
+- **フォルダレベル** (`+dbt-osmosis-options` 経由の推奨される標準的なアプローチ)
+- **ノードレベル** (`.sql` ファイル内の `config(dbt_osmosis_options=...)` 経由)
+- **列レベル** (スキーマファイル内の列 `meta:` 経由)
 
-**Why It Matters**: Now you can override or skip merges, re-lowercase columns, or specify prefixes to handle fuzzy matching—**all** at different granularities. This includes new keys like `prefix`, or existing ones like `output-to-lower`, or `numeric-precision-and-scale` that you can apply per-node or per-column.
+**重要理由**: マージのオーバーライドまたはスキップ、列の小文字化、あいまい一致を処理するためのプレフィックスの指定など、**すべて** 異なる粒度で設定できるようになりました。これには、`prefix` のような新しいキーや、`output-to-lower`、`numeric-precision-and-scale` のようなノードごとまたは列ごとに適用できる既存のキーが含まれます。
 
-Example folder-level override:
+フォルダレベルのオーバーライドの例:
 
 ```yaml
 models:
@@ -133,7 +133,7 @@ models:
         output-to-lower: true
 ```
 
-Example node-level override in `.sql`:
+`.sql` でのノードレベルのオーバーライドの例:
 
 ```sql
 {{ config(materialized="view", dbt_osmosis_options={"prefix": "account_"}) }}
@@ -146,81 +146,81 @@ FROM ...
 
 ---
 
-## 6. Inheritance Defaults: No Overwriting Child Docs Without `--force-inherit-descriptions`
+## 6. 継承のデフォルト設定：`--force-inherit-descriptions` を指定しない場合、子ノードのドキュメントは上書きされません
 
-In `1.x.x`, **by default**, if your child model has **any** existing column description, dbt-osmosis **won’t** override it with upstream docs. This is a shift from older versions where child descriptions might have been overwritten if upstream had a doc.
+`1.x.x` では、**デフォルト** で、子ノードに既存の列記述が **存在** する場合、dbt-osmosis はそれを上流ノードのドキュメントで上書きしません。これは、上流ノードにドキュメントが存在すると子ノードの記述が上書きされる可能性があった以前のバージョンからの変更です。
 
-- **New**: Must pass `--force-inherit-descriptions` to forcibly overwrite child docs with ancestor docs.
-- The old `osmosis_keep_description` approach is effectively **deprecated** (now a no-op). The new approach is simpler: child nodes keep their doc unless you specifically **force** override.
+- **新機能**: 子ノードのドキュメントを祖先のドキュメントで強制的に上書きするには、`--force-inherit-descriptions` を渡す必要があります。
+- 従来の `osmosis_keep_description` によるアプローチは事実上**非推奨** となりました（現在は何も行いません）。新しいアプローチはよりシンプルです。明示的に **強制** 上書きしない限り、子ノードはドキュメントを保持します。
 
-Also, **meta** merges are more **additive**. Child meta keys are **merged** with upstream rather than overwriting them wholesale.
-
----
-
-## 7. New Plugin System for Fuzzy Matching
-
-dbt-osmosis `1.x.x` adds a **plugin system** (via [pluggy](https://pluggy.readthedocs.io)) so you can supply custom logic for how to match/alias columns across the lineage. Built-in “fuzzy” logic includes:
-
-- Case transformations (upper, lower, camelCase, PascalCase).
-- Prefix stripping (if you systematically rename columns like `stg_contact_id → contact_id`).
-
-If you have advanced naming patterns, you can **author** your own plugin that provides additional candidate column matches. This is a new feature and not strictly a breaking change, but important if you rely on custom inheritance logic.
+また、**メタ** マージはより**追加的** です。子ノードのメタキーは、完全に上書きされるのではなく、上流ノードと **マージ** されます。
 
 ---
 
-## 8. Potential PyPI Release Changes
+## 7. あいまい一致のための新しいプラグインシステム
 
-We’re planning to unify the stable release on `1.1.x` and possibly **yank** any older `1.0.0` from PyPI to reduce confusion. In short, **if you see `1.0.0`** in the wild, upgrade directly to `1.1.x` or later, because the final stable version has renamed flags and structured config.
+dbt-osmosis `1.x.x` では**プラグインシステム**（[pluggy](https://pluggy.readthedocs.io) 経由）が追加され、系統全体にわたって列の一致/エイリアスを設定するためのカスタムロジックを提供できるようになりました。組み込みの「あいまい」ロジックには以下が含まれます。
 
----
+- 大文字/小文字の変換（大文字、小文字、キャメルケース、パスカルケース）。
+- プレフィックスの除去（`stg_contact_id → contact_id` のように、列名を体系的に変更する場合）。
 
-# Summary of Breaking Changes
-
-1. **`vars.dbt-osmosis`** must nest sources under `sources:`.
-2. **Renamed CLI flags**:
-   - `--char-length` → `--string-length`
-   - `--numeric-precision` → `--numeric-precision-and-scale`
-   - `--catalog-file` → `--catalog-path`
-3. **`organize`/`refactor`** now prompt for file moves unless `--auto-apply` is used.
-4. **Seeds** require a `+dbt-osmosis: <path>` config.
-5. **Child descriptions** are **not** overwritten unless `--force-inherit-descriptions` is specified (old `osmosis_keep_description` is gone).
-6. **Meta merges** for child/parent are more additive (less overwriting).
-7. **New plugin system** for fuzzy matching logic.
+高度な命名パターンがある場合は、追加の列一致候補を提供する独自のプラグインを**作成**できます。これは新機能であり、厳密には互換性を破る変更ではありませんが、カスタム継承ロジックに依存している場合は重要です。
 
 ---
 
-## Recommended Upgrade Steps
+## 8. PyPI リリースにおける潜在的な変更
 
-1. **Update your `dbt_project.yml`:**
-   - Move source definitions under `vars.dbt-osmosis.sources`.
-   - Add `+dbt-osmosis: <path>` to your `seeds:` section.
-
-2. **Scan for Old Flags** in scripts or docs:
-   - Replace `--char-length`, `--numeric-precision`, `--catalog-file` with the new equivalents.
-   - If you rely on no-prompt file moves, add `--auto-apply`.
-
-3. **Decide on Overwrite Strategy**:
-   - If you want to preserve old behavior of forcing all child columns to adopt ancestor descriptions, pass `--force-inherit-descriptions`.
-   - Otherwise, enjoy the new default: child docs remain if present.
-
-4. **Check Your Options**:
-   - Migrate any old `dbt-osmosis` config keys (like prefix usage, skip-add-data-types, skip-merge-meta) into folder-level or node-level overrides as needed.
-
-5. **Explore the New Plugin System**:
-   - If you have a complex naming strategy or want to adapt the built-in fuzzy match, you can write a **pluggy** plugin.
-
-6. **Verify**:
-   - Run `dbt-osmosis yaml refactor --dry-run` in your project. Check the changes it would make.
-   - If everything looks good, run without `--dry-run`.
+安定版リリースを `1.1.x` に統一し、混乱を避けるため、古い `1.0.0` を PyPI から **削除** する予定です。つまり、**もし `1.0.0` を見かけたら**、最終的な安定版ではフラグ名が変更され、設定が構造化されているため、`1.1.x` 以降に直接アップグレードしてください。
 
 ---
 
-# Conclusion
+# 重大な変更点の概要
 
-With **dbt-osmosis 1.x.x**, the YAML management flow becomes **more declarative** and more **extensible**. The changes can require some minor updates to your `dbt_project.yml` and any scripts using the older flags. However, once migrated:
+1. **`vars.dbt-osmosis`** は、`sources:` 以下にソースをネストする必要があります。
+2. **CLI フラグの名前が変更されました**:
+- `--char-length` → `--string-length`
+- `--numeric-precision` → `--numeric-precision-and-scale`
+- `--catalog-file` → `--catalog-path`
+3. **`organize`/`refactor`** は、`--auto-apply` が使用されない限り、ファイルの移動を促すようになりました。
+4. **シード** には、`+dbt-osmosis: <path>` 設定が必要です。
+5. `--force-inherit-descriptions` が指定されていない限り、**子の説明** は上書きされません** (以前の `osmosis_keep_description` は廃止されました)。
+6. 子/親の**メタマージ** はより追加的になり、上書きが少なくなります。
+7. あいまい一致ロジックのための**新しいプラグインシステム**。
 
-- You gain **safer** merges (less overwriting child docs without intent),
-- A **cleaner** config approach for sources and ignoring columns,
-- And a **plugin system** for advanced rename logic.
+---
 
-We hope this guide clarifies each step, so you can confidently move to **dbt-osmosis 1.x.x** and enjoy the new features and stability. If you encounter any issues, feel free to open a GitHub issue or consult the updated docs for additional help!
+## 推奨されるアップグレード手順
+
+1. **`dbt_project.yml` を更新します。**
+- ソース定義を `vars.dbt-osmosis.sources` 直下に移動します。
+- `seeds:` セクションに `+dbt-osmosis: <path>` を追加します。
+
+2. **スクリプトまたはドキュメント内の古いフラグをスキャンします**
+- `--char-length`、`--numeric-precision`、`--catalog-file` を新しい同等のフラグに置き換えます。
+- プロンプトなしでファイルを移動する場合は、`--auto-apply` を追加します。
+
+3. **上書き戦略を決定します**
+- すべての子列に祖先の説明を強制的に適用するという古い動作を維持する場合は、`--force-inherit-descriptions` を渡します。
+- それ以外の場合は、新しいデフォルト（子ドキュメントが存在する場合は保持）を使用します。
+
+4. **オプションの確認**:
+- 必要に応じて、古い `dbt-osmosis` 設定キー（プレフィックスの使用、skip-add-data-types、skip-merge-meta など）をフォルダレベルまたはノードレベルのオーバーライドに移行します。
+
+5. **新しいプラグインシステムの確認**:
+- 複雑な命名戦略を採用している場合や、組み込みのあいまい一致を適用したい場合は、**pluggy** プラグインを作成できます。
+
+6. **検証**:
+- プロジェクトで `dbt-osmosis yaml refactor --dry-run` を実行します。変更内容を確認します。
+- 問題がなければ、`--dry-run` なしで実行します。
+
+---
+
+# まとめ
+
+**dbt-osmosis 1.x.x** では、YAML 管理フローが **より宣言的** かつ **拡張性** が高まります。この変更により、`dbt_project.yml` や古いフラグを使用しているスクリプトに若干の修正が必要になる場合があります。ただし、移行後は次のようなメリットがあります。
+
+- マージが **より安全** になります（子ドキュメントが意図せず上書きされる可能性が減ります）。
+- ソースと無視する列の設定が **よりクリーン** になります。
+- 高度な名前変更ロジックのための **プラグインシステム** が利用できます。
+
+このガイドで各ステップを明確にすることで、自信を持って **dbt-osmosis 1.x.x** に移行し、新機能と安定性を享受していただければ幸いです。問題が発生した場合は、GitHub の Issue を作成するか、更新されたドキュメントを参照してさらにサポートを受けてください。

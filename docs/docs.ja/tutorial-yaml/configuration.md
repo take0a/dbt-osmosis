@@ -1,13 +1,13 @@
 ---
 sidebar_position: 1
 ---
-# Configuration
+# 設定
 
-## Configuring dbt-osmosis
+## dbt-osmosis の設定
 
-### Models
+### モデル
 
-At a minimum, each **folder** (or subfolder) of models in your dbt project must specify **where** dbt-osmosis should place the YAML files, using the `+dbt-osmosis` directive:
+少なくとも、dbt プロジェクト内の各モデルの **フォルダ** (またはサブフォルダ) には、`+dbt-osmosis` ディレクティブを使用して、dbt-osmosis が YAML ファイルを配置する **場所** を指定する必要があります。
 
 ```yaml title="dbt_project.yml"
 models:
@@ -26,7 +26,7 @@ models:
       +dbt-osmosis: "prod.yml"
 ```
 
-You can also apply it to **seeds** exactly the same way:
+まったく同じ方法で **seeds** に適用することもできます。
 
 ```yaml title="dbt_project.yml"
 seeds:
@@ -34,13 +34,13 @@ seeds:
     +dbt-osmosis: "_schema.yml"
 ```
 
-This ensures seeds also end up with automatically created YAML schemas.
+これにより、seed にも自動的に作成された YAML スキーマが使用されるようになります。
 
 ---
 
 ### Sources
 
-Optionally, you can configure dbt-osmosis to manage **sources** by specifying an entry under `vars.dbt-osmosis.sources`. For each source you want managed:
+オプションとして、`vars.dbt-osmosis.sources` にエントリを指定することで、dbt-osmosis が **source** を管理するように設定できます。管理したいソースごとに、以下の手順を実行してください。
 
 ```yaml title="dbt_project.yml"
 vars:
@@ -60,22 +60,22 @@ vars:
     - ".*__key__.namespace"
 ```
 
-**Key Points**:
+**キーポイント**:
 
-- `vars: dbt-osmosis: sources: <source_name>` sets **where** the source YAML file lives.
-- If the source doesn't exist yet, dbt-osmosis can **bootstrap** that YAML automatically when you run `yaml organize` or `yaml refactor`.
-- `schema: salesforce_v2` overrides the default schema name if desired. If you omit it, dbt-osmosis assumes your source name is the schema name.
-- Patterns in `column_ignore_patterns` let you skip ephemeral or system columns across your entire project.
+- `vars: dbt-osmosis: sources: <source_name>` は、ソース YAML ファイルの **場所** を設定します。
+- ソースがまだ存在しない場合、dbt-osmosis は `yaml organizing` または `yaml refactor` を実行すると、その YAML を自動的に **ブートストラップ** します。
+- `schema: salesforce_v2` は、必要に応じてデフォルトのスキーマ名をオーバーライドします。これを省略した場合、dbt-osmosis はソース名をスキーマ名とみなします。
+- `column_ignore_patterns` のパターンを使用すると、プロジェクト全体で一時的な列やシステム列をスキップできます。
 
 ---
 
-## Fine-Grained Control Over Behavior
+## 動作をきめ細かく制御
 
-Beyond **where** to place files, dbt-osmosis provides many **tunable options** for how it handles column injection, data types, inheritance, etc. You can specify these in **multiple levels**—globally, folder-level, node-level, or even per-column. dbt-osmosis merges them in a chain, so the most specific setting “wins.”
+dbt-osmosis は、ファイルの配置場所だけでなく、列インジェクション、データ型、継承などの処理方法に関する多くの **調整可能なオプション** を提供します。これらのオプションは、グローバル、フォルダレベル、ノードレベル、さらには列ごとに **複数のレベル** で指定できます。dbt-osmosis はこれらの設定をチェーン状にマージするため、最も具体的な設定が「優先」されます。
 
-### 1. Global Options via Command Line Flags
+### 1. コマンドラインフラグによるグローバルオプション
 
-You can declare project-wide defaults using command line flags when running the dbt-osmosis CLI:
+dbt-osmosis CLI 実行時に、コマンドラインフラグを使用してプロジェクト全体のデフォルトを宣言できます。
 
 ```sh
 dbt-osmosis yaml refactor \
@@ -91,11 +91,11 @@ dbt-osmosis yaml refactor \
   --sort-by=database
 ```
 
-These **global** settings apply to **all** models and sources unless overridden at a lower level.
+これらの**グローバル**設定は、下位レベルで上書きされない限り、**すべての**モデルとソースに適用されます。
 
-### 2. Folder-Level +dbt-osmosis-options
+### 2. フォルダレベルの +dbt-osmosis-options
 
-This is the canonical approach in 1.1 forward. Inside `dbt_project.yml`, you can attach `+dbt-osmosis-options` to a subfolder:
+これはバージョン 1.1 以降の標準的なアプローチです。`dbt_project.yml` 内で、サブフォルダに `+dbt-osmosis-options` を追加できます。
 
 ```yaml title="dbt_project.yml"
 models:
@@ -119,11 +119,11 @@ models:
       +dbt-osmosis-sort-by: "alphabetical" # Flat keys work too
 ```
 
-This means everything in the `staging` folder will skip adding **new** columns from the database, reorder existing columns alphabetically, but **won’t** skip data types (the default from the global level stands). Meanwhile, `intermediate` models skip adding tags and convert all columns/data types to lowercase.
+つまり、`staging` フォルダ内のすべてにおいて、データベースからの**新しい**列の追加はスキップされ、既存の列はアルファベット順に並べ替えられますが、データ型はスキップされません（グローバルレベルのデフォルトが維持されます）。一方、`intermediate` モデルではタグの追加がスキップされ、すべての列/データ型が小文字に変換されます。
 
-### 3. Node-Level Config in the SQL File
+### 3. SQL ファイルでのノードレベル設定
 
-You can also specify **node-level** overrides in the `.sql` file via dbt’s `config(...)`:
+dbt の `config(...)` を使って、`.sql` ファイルで **ノードレベル** のオーバーライドを指定することもできます。
 
 ```jinja
 -- models/intermediate/some_model.sql
@@ -138,11 +138,11 @@ You can also specify **node-level** overrides in the `.sql` file via dbt’s `co
 SELECT * FROM ...
 ```
 
-Here, we’re telling dbt-osmosis that for **this** model specifically, skip adding data types and sort columns alphabetically. This merges on top of any folder-level or global-level config.
+ここでは、dbt-osmosis に、**この** モデルに限ってデータ型の追加を省略し、列をアルファベット順に並べ替えるように指示しています。これは、フォルダレベルまたはグローバルレベルの設定にマージされます。
 
-### 4. Per-Column Meta
+### 4. 列ごとのメタ情報
 
-If you want to override dbt-osmosis behavior for a **specific column** only, you can do so in your schema YAML:
+**特定の列** のみの dbt-osmosis の動作をオーバーライドしたい場合は、スキーマ YAML で以下のように記述できます。
 
 ```yaml
 models:
@@ -156,47 +156,47 @@ models:
             skip-add-tags: true
 ```
 
-Or in your node’s dictionary-based definition. dbt-osmosis checks:
+または、ノードの辞書ベースの定義で確認できます。dbt-osmosis は以下の項目をチェックします:
 
-1. `column.meta["dbt-osmosis-skip-add-data-types"]` or `column.meta["dbt_osmosis_skip_add_data_types"]`
-2. `column.meta["dbt-osmosis-options"]` or `dbt_osmosis_options`
-3. Then your **node** meta/config
-4. Then folder-level
-5. Finally global project-level
+1. `column.meta["dbt-osmosis-skip-add-data-types"]` または `column.meta["dbt_osmosis_skip_add_data_types"]`
+2. `column.meta["dbt-osmosis-options"]` または `dbt_osmosis_options`
+3. 次に **node** の meta/config
+4. 次にフォルダレベル
+5. 最後にグローバルプロジェクトレベル
 
-At each level, dbt-osmosis merges or overrides as needed.
-
----
-
-## Examples of Commonly Used dbt-osmosis Options
-
-Below is a reference table of some popular flags or options you can set at **any** of the levels (global, folder, node, column). Many of these are also available as CLI flags, but when set in your configuration, they become “defaults.”
-
-| Option Name                       | Purpose                                                                                                                    |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `skip-add-columns`               | If `true`, dbt-osmosis won’t inject columns that exist in the warehouse but are missing in your YAML.                      |
-| `skip-add-source-columns`        | If `true`, skip column injection **specifically** on sources. Useful if sources have wide schemas and you only want columns for models. |
-| `skip-add-data-types`            | If `true`, dbt-osmosis won’t populate the `data_type` field for columns.                                                  |
-| `skip-merge-meta`                | If `true`, dbt-osmosis won’t inherit or merge `meta` fields from upstream models.                                         |
-| `skip-add-tags`                  | If `true`, dbt-osmosis won’t inherit or merge `tags` from upstream models.                                                |
-| `numeric-precision-and-scale`    | If `true`, numeric columns will keep precision/scale in their type (like `NUMBER(38, 8)` vs. `NUMBER`).                    |
-| `string-length`                  | If `true`, string columns will keep length in their type (like `VARCHAR(256)` vs. `VARCHAR`).                              |
-| `force-inherit-descriptions`     | If `true`, a child model’s columns will always accept upstream descriptions if the child’s description is **empty** or a placeholder. |
-| `output-to-lower`                | If `true`, all column names and data types in the YAML become lowercase.                                                  |
-| `sort-by`                        | `database` or `alphabetical`. Tells dbt-osmosis how to reorder columns.                                                   |
-| `prefix`                         | A special string used by the **fuzzy** matching plugin. If you consistently prefix columns in staging, dbt-osmosis can strip it when matching. |
-| `add-inheritance-for-specified-keys` | Provide a list of **additional** keys (e.g., `["policy_tags"]`) that should also be inherited from upstream.             |
-
-And much more. Many flags also exist as **command-line** arguments (`--skip-add-tags`, `--skip-merge-meta`, `--force-inherit-descriptions`, etc.), which can override or complement your config settings in `dbt_project.yml`.
+各レベルで、dbt-osmosis は必要に応じてマージまたはオーバーライドを行います。
 
 ---
 
-## Summary
+## よく使用される dbt-osmosis オプションの例
 
-**dbt-osmosis** configuration is highly **modular**. You:
+以下は、**任意の** レベル（グローバル、フォルダ、ノード、列）で設定できる一般的なフラグまたはオプションの一覧です。これらの多くは CLI フラグとしても使用できますが、構成で設定すると「デフォルト」になります。
 
-1. **Always** specify a `+dbt-osmosis: "<some_path>.yml"` directive per folder (so osmosis knows where to place YAML).
-2. Set **options** (like skipping columns, adding data types, etc.) **globally** via either cli flags, a more granular **folder-level** with `+dbt-osmosis-options`, **node-level** in `.sql`, or **column-level** in metadata.
-3. Let dbt-osmosis handle the merging and logic so that the final outcome respects your most **specific** settings.
+| オプション名 | 目的 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `skip-add-columns` | `true` の場合、dbt-osmosis はウェアハウスには存在するものの YAML には存在しない列を挿入しません。 |
+| `skip-add-source-columns` | `true` の場合、**具体的に** ソースに対して列の挿入をスキップします。ソースのスキーマが広く、モデル用の列のみが必要な場合に便利です。 |
+| `skip-add-data-types` | `true` の場合、dbt-osmosis は列の `data_type` フィールドにデータを入力しません。|
+| `skip-merge-meta` | `true` の場合、dbt-osmosis は上流モデルから `meta` フィールドを継承またはマージしません。|
+| `skip-add-tags` | `true` の場合、dbt-osmosis は上流モデルから `tags` を継承またはマージしません。|
+| `numeric-precision-and-scale` | `true` の場合、数値列は型の精度/スケールを保持します (`NUMBER(38, 8)` と `NUMBER` のように)。|
+| `string-length` | `true` の場合、文字列列は型の長さを保持します (`VARCHAR(256)` と `VARCHAR` のように)。|
+| `force-inherit-descriptions` | `true` の場合、子モデルの列は、子の説明が **空** またはプレースホルダーであっても、常に上流の説明を受け入れます。|
+| `output-to-lower` | `true` の場合、YAML 内のすべての列名とデータ型が小文字になります。|
+| `sort-by` | `database` または `alphabetical`。dbt-osmosis に列の並べ替え方法を指示します。|
+| `prefix` | **fuzzy** マッチングプラグインで使用される特殊な文字列。ステージングで常に列にプレフィックスを付けると、dbt-osmosis はマッチング時にプレフィックスを削除できます。|
+| `add-inheritance-for-specified-keys` | 上流から継承する **追加** キー（例: `["policy_tags"]`）のリストを指定します。|
 
-With this approach, you can achieve everything from a simple one-YAML-per-model style to a more advanced structure that merges doc from multiple upstream sources while selectively skipping columns or data types.
+その他多数。多くのフラグは **コマンドライン** 引数 (`--skip-add-tags`、`--skip-merge-meta`、`--force-inherit-descriptions` など) としても存在し、`dbt_project.yml` 内の構成設定を上書きまたは補完できます。
+
+---
+
+## まとめ
+
+**dbt-osmosis** の設定は高度にモジュール化されています。以下の点に注意してください。
+
+1. フォルダごとに `+dbt-osmosis: "<some_path>.yml"` ディレクティブを **必ず** 指定します（これにより、Osmosis は YAML を配置する場所を認識できます）。
+2. **オプション**（列のスキップ、データ型の追加など）を **グローバル** に設定します。設定は、CLI フラグ、`+dbt-osmosis-options` を使用したより詳細な **フォルダレベル**、`.sql` の **ノードレベル**、またはメタデータの **列レベル** のいずれかで行います。
+3. 最終的な結果がユーザーの最も**具体的な**設定を反映するように、dbt-osmosis がマージとロジックを処理します。
+
+このアプローチにより、モデルごとに 1 つの YAML というシンプルなスタイルから、列やデータ型を選択的にスキップしながら複数のアップストリーム ソースからのドキュメントをマージするより高度な構造まで、あらゆるものを実現できます。
