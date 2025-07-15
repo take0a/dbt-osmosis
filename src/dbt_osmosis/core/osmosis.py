@@ -1,5 +1,5 @@
 # pyright: reportUnknownVariableType=false, reportPrivateImportUsage=false, reportAny=false, reportUnknownMemberType=false
-"""dbt-osmosis core module with backwards compatibility imports."""
+"""下位互換性インポートを備えた dbt-osmosis コア モジュール。"""
 
 from __future__ import annotations
 

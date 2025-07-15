@@ -19,7 +19,7 @@ __all__ = [
 
 
 def _is_fqn_match(node: ResultNode, fqns: list[str]) -> bool:
-    """Filter models based on the provided fully qualified name matching on partial segments."""
+    """部分セグメントに一致する、提供された完全修飾名に基づいてモデルをフィルタリングします。"""
     logger.debug(":mag_right: Checking if node => %s matches any FQNs => %s", node.unique_id, fqns)
     for fqn_str in fqns:
         parts = fqn_str.split(".")
@@ -33,7 +33,7 @@ def _is_fqn_match(node: ResultNode, fqns: list[str]) -> bool:
 
 
 def _is_file_match(node: ResultNode, paths: list[Path | str], root: Path | str) -> bool:
-    """Check if a node's file path matches any of the provided file paths or names."""
+    """ノードのファイル パスが、指定されたファイル パスまたは名前のいずれかと一致するかどうかを確認します。"""
     node_path = Path(root, node.original_file_path).resolve()
     yaml_path = None
     if node.patch_path:
@@ -60,19 +60,19 @@ def _topological_sort(
     candidate_nodes: list[tuple[str, ResultNode]],
 ) -> list[tuple[str, ResultNode]]:
     """
-    Perform a topological sort on the given candidate_nodes (uid, node) pairs
-    based on their dependencies. If a cycle is detected, raise a ValueError.
+    指定された候補ノード（uid、ノード）のペアに対し、依存関係に基づいてトポロジカルソートを実行します。
+    循環が検出された場合は、ValueError を送出します。
 
-    Kahn's Algorithm:
-      1) Build adjacency list: parent -> {child, child, ...}
-         (Because if node 'child' depends on 'parent', we have an edge parent->child).
-      2) Compute in-degrees for all nodes.
-      3) Collect all nodes with in-degree == 0 into a queue.
-      4) Repeatedly pop from queue and 'visit' that node,
-         then decrement the in-degree of its children.
-         If any child's in-degree becomes 0, push it into the queue.
-      5) If we visited all nodes, we have a valid topological order.
-         Otherwise, a cycle exists.
+    カーンのアルゴリズム:
+    1) 隣接リストを構築: 親 -> {子, 子, ...}
+    (ノード「子」が「親」に依存する場合、親->子というエッジが存在するため)。
+    2) すべてのノードの入次数を計算する。
+    3) 入次数が 0 であるすべてのノードをキューに集める。
+    4) キューから繰り返しポップしてそのノードを「訪問」し、
+    そのノードの子ノードの入次数をデクリメントする。
+    いずれかの子ノードの入次数が 0 になった場合は、そのノードをキューにプッシュする。
+    5) すべてのノードを訪問した場合、有効な位相順序が得られる。
+    そうでない場合、循環が存在する。
     """
     adjacency: defaultdict[str, set[str]] = defaultdict(set)
     in_degree: defaultdict[str, int] = defaultdict(int)
@@ -113,7 +113,7 @@ def _iter_candidate_nodes(
     context: t.Any,  # YamlRefactorContext type will be imported
     include_external: bool = False,
 ) -> t.Iterator[tuple[str, ResultNode]]:
-    """Iterate over the models in the dbt project manifest applying the filter settings."""
+    """フィルター設定を適用して、dbt プロジェクト マニフェスト内のモデルを反復処理します。"""
     logger.debug(
         ":mag: Filtering nodes (models/sources/seeds) with user-specified settings => %s",
         context.settings,

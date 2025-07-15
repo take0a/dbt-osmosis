@@ -22,7 +22,8 @@ def _write_yaml(
     dry_run: bool = False,
     mutation_tracker: t.Callable[[int], None] | None = None,
 ) -> None:
-    """Write a yaml file to disk and register a mutation with the context. Clears the path from the buffer cache."""
+    """yaml ファイルをディスクに書き込み、コンテキストにミューテーションを登録します。
+    バッファキャッシュからパスをクリアします。"""
     logger.debug(":page_with_curl: Attempting to write YAML to => %s", path)
     if not dry_run:
         with yaml_handler_lock:
@@ -49,7 +50,8 @@ def commit_yamls(
     dry_run: bool = False,
     mutation_tracker: t.Callable[[int], None] | None = None,
 ) -> None:
-    """Commit all files in the yaml buffer cache to disk. Clears the buffer cache and registers mutations."""
+    """yaml バッファキャッシュ内のすべてのファイルをディスクにコミットします。
+    バッファキャッシュをクリアし、ミューテーションを登録します。"""
     logger.info(":inbox_tray: Committing all YAMLs from buffer cache to disk.")
     if not dry_run:
         with yaml_handler_lock:

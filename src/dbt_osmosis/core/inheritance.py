@@ -22,7 +22,7 @@ def _build_node_ancestor_tree(
     visited: set[str] | None = None,
     depth: int = 1,
 ) -> dict[str, list[str]]:
-    """Build a flat graph of a node and it's ancestors."""
+    """ノードとその祖先のフラット グラフを構築します。"""
     logger.debug(":seedling: Building ancestor tree/branch for => %s", node.unique_id)
     if tree is None or visited is None:
         visited = set(node.unique_id)
@@ -49,7 +49,7 @@ def _build_node_ancestor_tree(
 
 
 def _get_node_yaml(context: t.Any, member: ResultNode) -> MappingProxyType[str, t.Any] | None:
-    """Get a read-only view of the parsed YAML for a dbt model or source node."""
+    """dbt モデルまたはソース ノードの解析された YAML の読み取り専用ビューを取得します。"""
     from pathlib import Path
 
     from dbt_osmosis.core.introspection import _find_first
@@ -88,7 +88,7 @@ def _get_node_yaml(context: t.Any, member: ResultNode) -> MappingProxyType[str, 
 
 
 def _build_column_knowledge_graph(context: t.Any, node: ResultNode) -> dict[str, dict[str, t.Any]]:
-    """Generate a column knowledge graph for a dbt model or source node."""
+    """dbt モデルまたはソース ノードの列ナレッジ グラフを生成します。"""
     tree = _build_node_ancestor_tree(context.project.manifest, node)
     logger.debug(":family_tree: Node ancestor tree => %s", tree)
 

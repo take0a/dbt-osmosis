@@ -24,14 +24,14 @@ hookimpl = pluggy.HookimplMarker("dbt-osmosis")
 
 @_hookspec
 def get_candidates(name: str, node: ResultNode, context: t.Any) -> list[str]:  # pyright: ignore[reportUnusedParameter]
-    """Get a list of candidate names for a column."""
+    """列の候補名のリストを取得します。"""
     raise NotImplementedError
 
 
 class FuzzyCaseMatching:
     @hookimpl
     def get_candidates(self, name: str, node: ResultNode, context: t.Any) -> list[str]:
-        """Get a list of candidate names for a column based on case variants."""
+        """大文字と小文字の区別に基づいて列の候補名のリストを取得します。"""
         _ = node, context
         variants = [
             name.lower(),  # lowercase
@@ -46,7 +46,7 @@ class FuzzyCaseMatching:
 class FuzzyPrefixMatching:
     @hookimpl
     def get_candidates(self, name: str, node: ResultNode, context: t.Any) -> list[str]:
-        """Get a list of candidate names for a column excluding a prefix."""
+        """プレフィックスを除いた列の候補名のリストを取得します。"""
         _ = context
         variants = []
         from dbt_osmosis.core.introspection import _get_setting_for_node
@@ -63,7 +63,7 @@ class FuzzyPrefixMatching:
 
 @lru_cache(maxsize=None)
 def get_plugin_manager():
-    """Get the pluggy plugin manager for dbt-osmosis."""
+    """dbt-osmosis 用のプラグイン マネージャーを入手します。"""
     manager = pluggy.PluginManager("dbt-osmosis")
     _ = manager.register(FuzzyCaseMatching())
     _ = manager.register(FuzzyPrefixMatching())

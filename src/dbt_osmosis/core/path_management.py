@@ -24,7 +24,7 @@ __all__ = [
 
 @dataclass
 class SchemaFileLocation:
-    """Describes the current and target location of a schema file."""
+    """スキーマ ファイルの現在の場所とターゲットの場所を説明します。"""
 
     target: Path
     current: Path | None = None
@@ -32,7 +32,7 @@ class SchemaFileLocation:
 
     @property
     def is_valid(self) -> bool:
-        """Check if the current and target locations are valid."""
+        """現在の場所とターゲットの場所が有効かどうかを確認します。"""
         valid = self.current == self.target
         logger.debug(":white_check_mark: Checking if schema file location is valid => %s", valid)
         return valid
@@ -40,7 +40,7 @@ class SchemaFileLocation:
 
 @dataclass
 class SchemaFileMigration:
-    """Describes a schema file migration operation."""
+    """スキーマ ファイルの移行操作について説明します。"""
 
     output: dict[str, t.Any] = field(
         default_factory=lambda: {"version": 2, "models": [], "sources": []}
@@ -49,11 +49,11 @@ class SchemaFileMigration:
 
 
 class MissingOsmosisConfig(Exception):
-    """Raised when an osmosis configuration is missing."""
+    """osmosis 設定が見つからない場合に発生します。"""
 
 
 def _get_yaml_path_template(context: t.Any, node: ResultNode) -> str | None:
-    """Get the yaml path template for a dbt model or source node."""
+    """dbt モデルまたはソースノードの yaml パス テンプレートを取得します。"""
     from dbt_osmosis.core.introspection import _find_first
 
     if node.resource_type == NodeType.Source:
@@ -77,7 +77,7 @@ def _get_yaml_path_template(context: t.Any, node: ResultNode) -> str | None:
 
 
 def get_current_yaml_path(context: t.Any, node: ResultNode) -> t.Union[Path, None]:
-    """Get the current yaml path for a dbt model or source node."""
+    """dbt モデルまたはソースノードの現在の yaml パスを取得します。"""
     if node.resource_type in (NodeType.Model, NodeType.Seed) and getattr(node, "patch_path", None):
         path = Path(context.project.runtime_cfg.project_root).joinpath(
             t.cast(str, node.patch_path).partition("://")[-1]
@@ -92,7 +92,7 @@ def get_current_yaml_path(context: t.Any, node: ResultNode) -> t.Union[Path, Non
 
 
 def get_target_yaml_path(context: t.Any, node: ResultNode) -> Path:
-    """Get the target yaml path for a dbt model or source node."""
+    """dbt モデルまたはソースノードのターゲット yaml パスを取得します。"""
     tpl = _get_yaml_path_template(context, node)
     if not tpl:
         logger.warning(":warning: No path template found for => %s", node.unique_id)
@@ -144,7 +144,7 @@ def get_target_yaml_path(context: t.Any, node: ResultNode) -> Path:
 def build_yaml_file_mapping(
     context: t.Any, create_missing_sources: bool = False
 ) -> dict[str, SchemaFileLocation]:
-    """Build a mapping of dbt model and source nodes to their current and target yaml paths."""
+    """dbt モデルとソース ノードの現在の yaml パスとターゲット yaml パスへのマッピングを構築します。"""
     logger.info(":globe_with_meridians: Building YAML file mapping...")
 
     if create_missing_sources:
@@ -166,10 +166,12 @@ def build_yaml_file_mapping(
 
 
 def create_missing_source_yamls(context: t.Any) -> None:
-    """Create source files for sources defined in the dbt_project.yml dbt-osmosis var which don't exist as nodes.
+    """dbt_project.yml の dbt-osmosis 変数で定義されているが、
+    ノードとして存在しないソースのソースファイルを作成します。
 
-    This is a useful preprocessing step to ensure that all sources are represented in the dbt project manifest. We
-    do not have rich node information for non-existent sources, hence the alternative codepath here to bootstrap them.
+    これは、すべてのソースが dbt プロジェクトマニフェストに確実に含まれるようにするための便利な前処理手順です。
+    存在しないソースについては詳細なノード情報がないため、
+    ここでは代替コードパスを使用してそれらをブートストラップしています。
     """
     from dbt_osmosis.core.config import _reload_manifest
     from dbt_osmosis.core.introspection import _find_first, get_columns

@@ -19,7 +19,7 @@ def create_yaml_instance(
     default_flow_style: bool = False,
     encoding: str = "utf-8",
 ) -> ruamel.yaml.YAML:
-    """Returns a ruamel.yaml.YAML instance configured with the provided settings."""
+    """指定された設定で構成された ruamel.yaml.YAML インスタンスを返します。"""
     logger.debug(":notebook: Creating ruamel.yaml.YAML instance with custom formatting.")
     y = ruamel.yaml.YAML()
     y.indent(mapping=indent_mapping, sequence=indent_sequence, offset=indent_offset)

@@ -20,12 +20,12 @@ __all__ = [
 # Dynamic client creation function
 def get_llm_client():
     """
-    Creates and returns an LLM client and model engine string based on environment variables.
+    環境変数に基づいて LLM クライアントとモデル エンジン文字列を作成して返します。
 
     Returns:
-        tuple: (client, model_engine) where client is an OpenAI or openai object, and model_engine is the model name.
+        tuple: (client, model_engine) ここで、client は OpenAI または openai オブジェクトであり、model_engine はモデル名です。
     Raises:
-        ValueError: If required environment variables are missing or provider is invalid.
+        ValueError: 必要な環境変数が欠落しているか、プロバイダーが無効である場合。
     """
     provider = os.getenv("LLM_PROVIDER", "openai").lower()
 
@@ -124,7 +124,8 @@ def _create_llm_prompt_for_model_docs_as_json(
     existing_context: str | None = None,
     upstream_docs: list[str] | None = None,
 ) -> list[dict[str, t.Any]]:
-    """Builds a system + user prompt instructing the model to produce a JSON structure describing the entire model (including columns)."""
+    """モデル全体 (列を含む) を記述する JSON 構造を生成するようにモデルに指示するシステム + 
+    ユーザー プロンプトを構築します。"""
     if upstream_docs is None:
         upstream_docs = []
 
@@ -201,17 +202,17 @@ def _create_llm_prompt_for_column(
     upstream_docs: list[str] | None = None,
 ) -> list[dict[str, str]]:
     """
-    Builds a system + user prompt for generating a docstring for a single column.
-    The final answer should be just the docstring text, not JSON or YAML.
+    単一列の docstring を生成するためのシステム + ユーザープロンプトを構築します。
+    最終的な回答は JSON や YAML ではなく、docstring テキストのみである必要があります。
 
     Args:
-        column_name (str): The name of the column to describe.
-        existing_context (str | None): Any relevant metadata or table definitions.
-        table_name (str | None): Name of the table/model (optional).
-        upstream_docs (list[str] | None): Optional docs or references you might have.
+        column_name (str): 説明する列の名前。
+        existing_context (str | None): 関連するメタデータまたはテーブル定義。
+        table_name (str | None): テーブル/モデルの名前 (オプション)。
+        upstream_docs (list[str] | None): オプションのドキュメントまたはリファレンス。
 
     Returns:
-        list[dict[str, str]]: List of prompt messages for the LLM.
+        list[dict[str, str]]: LLM のプロンプト メッセージのリスト。
     """
     if upstream_docs is None:
         upstream_docs = []
@@ -317,9 +318,9 @@ def generate_model_spec_as_json(
     existing_context: str | None = None,
     temperature: float = 0.3,
 ) -> dict[str, t.Any]:
-    """Calls the LLM client to generate a JSON specification for a model's metadata and columns.
+    """LLM クライアントを呼び出して、モデルのメタデータと列の JSON 仕様を生成します。
 
-    The structure is:
+    構造は次のとおりです:
       {
         "description": "...",
         "columns": [
@@ -329,13 +330,13 @@ def generate_model_spec_as_json(
       }
 
     Args:
-        sql_content (str): Full SQL code of the model
-        upstream_docs (list[str] | None): Optional list of strings containing context or upstream docs
-        model_engine (str): Which OpenAI model to use (e.g., 'gpt-3.5-turbo', 'gpt-4')
-        temperature (float): OpenAI completion temperature
+        sql_content (str): モデルの完全なSQLコード
+        upstream_docs (list[str] | None): コンテキストまたはアップストリームドキュメントを含む文字列のオプションリスト
+        model_engine (str): 使用する OpenAI モデル (例: 'gpt-3.5-turbo'、'gpt-4')
+        temperature (float): OpenAI完了温度
 
     Returns:
-        dict[str, t.Any]: A dictionary with keys "description", "columns".
+        dict[str, t.Any]: キー「description」、「columns」を持つ辞書。
     """
     messages = _create_llm_prompt_for_model_docs_as_json(
         sql_content, existing_context, upstream_docs
@@ -376,18 +377,18 @@ def generate_column_doc(
     upstream_docs: list[str] | None = None,
     temperature: float = 0.7,
 ) -> str:
-    """Calls the LLM client to generate documentation for a single column in a table.
+    """LLM クライアントを呼び出して、テーブル内の 1 つの列のドキュメントを生成します。
 
     Args:
-        column_name (str): The name of the column to describe
-        existing_context (str | None): Any relevant metadata or table definitions
-        table_name (str | None): Name of the table/model (optional)
-        upstream_docs (list[str] | None): Optional docs or references you might have
-        model_engine (str): The OpenAI model to use (e.g., 'gpt-3.5-turbo')
-        temperature (float): OpenAI completion temperature
+        column_name (str): 記述する列の名前
+        existing_context (str | None): 関連するメタデータまたはテーブル定義
+        table_name (str | None): テーブル/モデルの名前（オプション）
+        upstream_docs (list[str] | None): オプションのドキュメントや参考資料
+        model_engine (str): 使用する OpenAI モデル (例: 'gpt-3.5-turbo')
+        temperature (float): OpenAI完了温度
 
     Returns:
-        str: A short docstring suitable for a "description" field
+        str: 「説明」フィールドに適した短いドキュメント文字列
     """
     messages = _create_llm_prompt_for_column(
         column_name, existing_context, table_name, upstream_docs
@@ -418,17 +419,17 @@ def generate_table_doc(
     upstream_docs: list[str] | None = None,
     temperature: float = 0.7,
 ) -> str:
-    """Calls the LLM client to generate documentation for a single column in a table.
+    """LLM クライアントを呼び出して、テーブル内の 1 つの列のドキュメントを生成します。
 
     Args:
-        sql_content (str): The SQL code for the table
-        table_name (str | None): Name of the table/model (optional)
-        upstream_docs (list[str] | None): Optional docs or references you might have
-        model_engine (str): The OpenAI model to use (e.g., 'gpt-3.5-turbo')
-        temperature (float): OpenAI completion temperature
+        sql_content (str): テーブルのSQLコード
+        table_name (str | None): テーブル/モデルの名前（オプション）
+        upstream_docs (list[str] | None): オプションのドキュメントや参考資料
+        model_engine (str): 使用する OpenAI モデル (例: 'gpt-3.5-turbo')
+        temperature (float): OpenAI完了温度
 
     Returns:
-        str: A short docstring suitable for a "description" field
+        str: 「説明」フィールドに適した短いドキュメント文字列
     """
     messages = _create_llm_prompt_for_table(sql_content, table_name, upstream_docs)
 

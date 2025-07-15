@@ -12,13 +12,14 @@ __all__ = [
 ]
 
 _YAML_BUFFER_CACHE: dict[Path, t.Any] = {}
-"""Cache for yaml file buffers to avoid redundant disk reads/writes and simplify edits."""
+"""冗長なディスクの読み取り/書き込みを回避し、編集を簡素化するために、yaml ファイル バッファーをキャッシュします。"""
 
 
 def _read_yaml(
     yaml_handler: ruamel.yaml.YAML, yaml_handler_lock: threading.Lock, path: Path
 ) -> dict[str, t.Any]:
-    """Read a yaml file from disk. Adds an entry to the buffer cache so all operations on a path are consistent."""
+    """ディスクから yaml ファイルを読み取ります。
+    バッファキャッシュにエントリを追加することで、パス上のすべての操作の一貫性を保ちます。"""
     with yaml_handler_lock:
         if path not in _YAML_BUFFER_CACHE:
             if not path.is_file():

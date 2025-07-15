@@ -29,7 +29,7 @@ __all__ = [
 T = t.TypeVar("T")
 
 _COLUMN_LIST_CACHE: dict[str, OrderedDict[str, ColumnMetadata]] = {}
-"""Cache for column lists to avoid redundant introspection."""
+"""冗長なイントロスペクションを回避するために列リストをキャッシュします。"""
 
 
 @t.overload
@@ -45,7 +45,7 @@ def _find_first(
 def _find_first(
     coll: t.Iterable[T], predicate: t.Callable[[T], bool], default: T | None = None
 ) -> T | None:
-    """Find the first item in a container that satisfies a predicate."""
+    """述語を満たすコンテナー内の最初の項目を検索します。"""
     for item in coll:
         if predicate(item):
             return item
@@ -53,7 +53,7 @@ def _find_first(
 
 
 def normalize_column_name(column: str, credentials_type: str) -> str:
-    """Apply case normalization to a column name based on the credentials type."""
+    """資格情報の種類に基づいて、列名に大文字と小文字の正規化を適用します。"""
     if credentials_type == "snowflake" and column.startswith('"') and column.endswith('"'):
         logger.debug(":snowflake: Column name found with double-quotes => %s", column)
         pass
@@ -65,7 +65,7 @@ def normalize_column_name(column: str, credentials_type: str) -> str:
 def _maybe_use_precise_dtype(
     col: BaseColumn, settings: t.Any, node: ResultNode | None = None
 ) -> str:
-    """Use the precise data type if enabled in the settings."""
+    """設定で有効になっている場合は、正確なデータ型を使用します。"""
     use_num_prec = _get_setting_for_node(
         "numeric-precision-and-scale", node, col.name, fallback=settings.numeric_precision_and_scale
     )
@@ -88,7 +88,7 @@ def _get_setting_for_node(
     *,
     fallback: t.Any | None = None,
 ) -> t.Any:
-    """Get a configuration value for a dbt node from the node's meta and config.
+    """ノードのメタと構成から dbt ノードの構成値を取得します。
 
     models: # dbt_project
       project:
@@ -162,7 +162,7 @@ def _get_setting_for_node(
 def get_columns(
     context: t.Any, relation: BaseRelation | ResultNode | None
 ) -> dict[str, ColumnMetadata]:
-    """Equivalent to get_columns_meta in old code but directly referencing a key, not a node."""
+    """古いコードの get_columns_meta と同等ですが、ノードではなくキーを直接参照します。"""
     normalized_columns: OrderedDict[str, ColumnMetadata] = OrderedDict()
 
     if relation is None:
@@ -251,7 +251,7 @@ def get_columns(
 
 
 def _load_catalog(settings: t.Any) -> CatalogResults | None:
-    """Load the catalog file if it exists and return a CatalogResults instance."""
+    """カタログ ファイルが存在する場合はそれを読み込み、CatalogResults インスタンスを返します。"""
     logger.debug(":mag: Attempting to load catalog from => %s", settings.catalog_path)
     if not settings.catalog_path:
         return None
@@ -265,7 +265,7 @@ def _load_catalog(settings: t.Any) -> CatalogResults | None:
 
 # NOTE: this is mostly adapted from dbt-core with some cruft removed, strict pyright is not a fan of dbt's shenanigans
 def _generate_catalog(context: t.Any) -> CatalogResults | None:
-    """Generate the dbt catalog file for the project."""
+    """プロジェクトの dbt カタログ ファイルを生成します。"""
     import dbt.utils as dbt_utils
 
     if context.config.disable_introspection:

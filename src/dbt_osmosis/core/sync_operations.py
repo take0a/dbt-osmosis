@@ -15,10 +15,10 @@ __all__ = [
 
 
 def _sync_doc_section(context: t.Any, node: ResultNode, doc_section: dict[str, t.Any]) -> None:
-    """Helper function that overwrites 'doc_section' with data from 'node'.
+    """'doc_section' を 'node' のデータで上書きするヘルパー関数です。
 
-    This includes columns, description, meta, tags, etc.
-    We assume node is the single source of truth, so doc_section is replaced.
+    これには列、説明、メタ、タグなどが含まれます。
+    node が唯一の信頼できる情報源であると想定しているため、doc_section は置き換えられます。
     """
     logger.debug(":arrows_counterclockwise: Syncing doc_section with node => %s", node.unique_id)
     if node.description and not doc_section.get("description"):
@@ -80,18 +80,18 @@ def _sync_doc_section(context: t.Any, node: ResultNode, doc_section: dict[str, t
 def sync_node_to_yaml(
     context: t.Any, node: t.Optional[ResultNode] = None, *, commit: bool = True
 ) -> None:
-    """Synchronize a single node's columns, description, tags, meta, etc. from the manifest into its corresponding YAML file.
+    """マニフェストから単一ノードの列、説明、タグ、メタなどを対応するYAMLファイルに同期します。
 
-    We assume the manifest node is the single source of truth, so the YAML file is overwritten to match.
+    マニフェストノードが唯一の信頼できる情報源であると想定しているため、YAMLファイルはそれに合わせて上書きされます。
 
-    - If the YAML file doesn't exist yet, we create it with minimal structure.
-    - If the YAML file exists, we read it from the file/ cache, locate the node's section,
-      and then overwrite that section to match the node's current columns, meta, etc.
+    - YAMLファイルがまだ存在しない場合は、最小限の構造で作成します。
+    - YAMLファイルが存在する場合は、ファイル/キャッシュからそれを読み取り、ノードのセクションを特定し、
+    そのセクションをノードの現在の列、メタなどに一致するように上書きします。
 
     This is a one-way sync:
         Manifest Node => YAML
 
-    All changes to the Node (columns, metadata, etc.) should happen before calling this function.
+    この関数を呼び出す前に、ノードへのすべての変更 (列、メタデータなど) を行う必要があります。
     """
     if node is None:
         logger.info(":wave: No single node specified; synchronizing all matched nodes.")

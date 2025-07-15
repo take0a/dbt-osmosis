@@ -19,13 +19,13 @@ __all__ = [
 
 
 def _has_jinja(code: str) -> bool:
-    """Check if a code string contains jinja tokens."""
+    """コード文字列に Jinja トークンが含まれているかどうかを確認します。"""
     logger.debug(":crystal_ball: Checking if code snippet has Jinja => %s", code[:50] + "...")
     return any(token in code for token in ("{{", "}}", "{%", "%}", "{#", "#}"))
 
 
 def compile_sql_code(context: DbtProjectContext, raw_sql: str) -> ManifestSQLNode:
-    """Compile jinja SQL using the context's manifest and adapter."""
+    """コンテキストのマニフェストとアダプターを使用して jinja SQL をコンパイルします。"""
     logger.info(":zap: Compiling SQL code. Possibly with jinja => %s", raw_sql[:75] + "...")
     tmp_id = str(uuid.uuid4())
     with context.manifest_mutex:
@@ -52,7 +52,7 @@ def compile_sql_code(context: DbtProjectContext, raw_sql: str) -> ManifestSQLNod
 
 
 def execute_sql_code(context: DbtProjectContext, raw_sql: str) -> tuple[AdapterResponse, Table]:
-    """Execute jinja SQL using the context's manifest and adapter."""
+    """コンテキストのマニフェストとアダプターを使用して Jinja SQL を実行します。"""
     logger.info(":running: Attempting to execute SQL => %s", raw_sql[:75] + "...")
     if _has_jinja(raw_sql):
         comp = compile_sql_code(context, raw_sql)

@@ -46,13 +46,13 @@ _CONTEXT = {"max_content_width": 800}
 @click.group()
 @click.version_option()
 def cli() -> None:
-    """dbt-osmosis is a CLI tool for dbt that helps you manage, document, and organize your dbt yaml files"""
+    """dbt-osmosis は、dbt yaml ファイルの管理、文書化、整理に役立つ dbt 用の CLI ツールです。"""
 
     pass
 
 
 def test_llm_connection(llm_client=None) -> None:
-    """Test the connection to the LLM client."""
+    """LLMクライアントへの接続をテストする"""
     import os
     from dbt_osmosis.core.llm import get_llm_client
 
@@ -77,7 +77,7 @@ def test_llm_connection(llm_client=None) -> None:
 
 @cli.command()
 def test_llm() -> None:
-    """Test the connection to the LLM client"""
+    """LLMクライアントへの接続をテストする"""
     logger.info("INFO: Invoking test_llm_connection...")
     from dbt_osmosis.core.llm import get_llm_client
 
@@ -88,11 +88,11 @@ def test_llm() -> None:
 
 @cli.group()
 def yaml():
-    """Manage, document, and organize dbt YAML files"""
+    """dbt YAML ファイルを管理、文書化、整理する"""
 
 
 def logging_opts(func: t.Callable[P, T]) -> t.Callable[P, T]:
-    """Options common across subcommands"""
+    """サブコマンドに共通するオプションのデコレータ"""
 
     @click.option(
         "--log-level",
@@ -112,11 +112,11 @@ def logging_opts(func: t.Callable[P, T]) -> t.Callable[P, T]:
 
 @cli.group()
 def sql():
-    """Execute and compile dbt SQL statements"""
+    """dbt SQL ステートメントの実行とコンパイル"""
 
 
 def dbt_opts(func: t.Callable[P, T]) -> t.Callable[P, T]:
-    """Options common across subcommands"""
+    """サブコマンドに共通するオプションのデコレータ。集約して、デコレータ地獄にしない"""
 
     @click.option(
         "--project-dir",
@@ -150,7 +150,7 @@ def dbt_opts(func: t.Callable[P, T]) -> t.Callable[P, T]:
 
 
 def yaml_opts(func: t.Callable[P, T]) -> t.Callable[P, T]:
-    """Options common to YAML operations."""
+    """YAML 操作に共通するオプションのデコレータ"""
 
     @click.argument("models", nargs=-1)
     @click.option(
@@ -292,12 +292,14 @@ def refactor(
     synthesize: bool = False,
     **kwargs: t.Any,
 ) -> None:
-    """Executes organize which syncs yaml files with database schema and organizes the dbt models
-    directory, reparses the project, then executes document passing down inheritable documentation
+    """このコマンドは、yaml ファイルをデータベーススキーマと同期させ、
+    dbt モデルディレクトリを整理するorganizationコマンドを実行します。
+    プロジェクトを再解析した後、継承可能なドキュメントを下位に渡す document コマンドを実行します。
 
     \f
-    This command will conform your project as outlined in `dbt_project.yml`, bootstrap undocumented
-    dbt models, and propagate column level documentation downwards once all yamls are accounted for
+    このコマンドは、`dbt_project.yml`で概説されているようにプロジェクトをコンフォームし、
+    ドキュメント化されていない dbt モデルをブートストラップし、
+    すべての yaml が考慮されたら列レベルのドキュメントを下位に伝播します。
     """
     logger.info(":water_wave: Executing dbt-osmosis\n")
     settings = DbtConfiguration(
@@ -359,11 +361,11 @@ def organize(
     disable_introspection: bool = False,
     **kwargs: t.Any,
 ) -> None:
-    """Organizes schema ymls based on config and injects undocumented models
+    """設定に基づいてスキーマymlを整理し、ドキュメント化されていないモデルを挿入します。
 
     \f
-    This command will conform schema ymls in your project as outlined in `dbt_project.yml` &
-    bootstrap undocumented dbt models
+    このコマンドは、`dbt_project.yml` に概説されているようにプロジェクト内のスキーマymlを準拠させ、
+    ドキュメント化されていないdbtモデルをブートストラップします。
     """
     logger.info(":water_wave: Executing dbt-osmosis\n")
     settings = DbtConfiguration(
@@ -475,11 +477,11 @@ def document(
     synthesize: bool = False,
     **kwargs: t.Any,
 ) -> None:
-    """Column level documentation inheritance for existing models
+    """既存モデルの列レベルのドキュメント継承
 
     \f
-    This command will conform schema ymls in your project as outlined in `dbt_project.yml` &
-    bootstrap undocumented dbt models
+    このコマンドは、`dbt_project.yml` に概説されているようにプロジェクト内のスキーマ yml を準拠させ、
+    ドキュメント化されていない dbt モデルをブートストラップします。
     """
     logger.info(":water_wave: Executing dbt-osmosis\n")
     settings = DbtConfiguration(
@@ -550,11 +552,11 @@ def workbench(
     host: str = "localhost",
     port: int = 8501,
 ) -> None:
-    """Start the dbt-osmosis workbench
+    """dbt-osmosis ワークベンチを起動します。
 
     \f
-    Pass the --options command to see streamlit specific options that can be passed to the app,
-    pass --config to see the output of streamlit config show
+    --options コマンドを指定すると、アプリに渡せる streamlit 固有のオプションが表示されます。
+    --config コマンドを指定すると、streamlit config show の出力が表示されます。
     """
     logger.info(":water_wave: Executing dbt-osmosis\n")
 
@@ -609,7 +611,7 @@ def run(
     target: str | None = None,
     **kwargs: t.Any,
 ) -> None:
-    """Executes a dbt SQL statement writing results to stdout"""
+    """dbt SQL 文を実行し、結果を標準出力に書き込みます。"""
     settings = DbtConfiguration(
         project_dir=t.cast(str, project_dir),
         profiles_dir=t.cast(str, profiles_dir),
@@ -640,7 +642,7 @@ def compile(
     target: str | None = None,
     **kwargs: t.Any,
 ) -> None:
-    """Executes a dbt SQL statement writing results to stdout"""
+    """dbt SQL 文を実行し、結果を標準出力に書き込みます。"""
     settings = DbtConfiguration(
         project_dir=t.cast(str, project_dir),
         profiles_dir=t.cast(str, profiles_dir),

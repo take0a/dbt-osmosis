@@ -110,7 +110,7 @@ def _get_demo_query() -> str:
 
 
 def _parse_args() -> dict[str, t.Any]:
-    """Parse command line arguments"""
+    """コマンドライン引数を解析する"""
     try:
         parser = argparse.ArgumentParser(description="dbt osmosis workbench")
         _ = parser.add_argument("--profiles-dir", help="dbt profile directory")
@@ -122,7 +122,7 @@ def _parse_args() -> dict[str, t.Any]:
 
 
 def change_target() -> None:
-    """Change the target profile"""
+    """ターゲットプロファイルを変更する"""
     set_invocation_context(get_env())
     ctx: DbtProject = state.app.ctx
     if ctx.runtime_cfg.target_name != state.app.target_name:
@@ -133,7 +133,7 @@ def change_target() -> None:
 
 
 def inject_model() -> None:
-    """Inject model into editor"""
+    """モデルをエディターに挿入する"""
     set_invocation_context(get_env())
     ctx: DbtProject = state.app.ctx
     if state.model is not None and state.model != "SCRATCH":
@@ -146,7 +146,7 @@ def inject_model() -> None:
 
 
 def save_model() -> None:
-    """Save model to disk"""
+    """モデルをディスクに保存"""
     ctx: DbtProject = state.app.ctx
     if state.model is not None and state.model != "SCRATCH":
         path = os.path.join(ctx.runtime_cfg.project_root, state.model.original_file_path)
@@ -156,7 +156,7 @@ def save_model() -> None:
 
 
 def sidebar(ctx: DbtProject) -> None:
-    """Render the sidebar"""
+    """サイドバーをレンダリングする"""
 
     with st.sidebar.expander("💡 Models", expanded=True):
         st.caption(
@@ -208,7 +208,7 @@ def sidebar(ctx: DbtProject) -> None:
 
 
 def compile(sql: str) -> str:
-    """Compile SQL using dbt context."""
+    """dbt コンテキストを使用して SQL をコンパイルします。"""
     ctx: DbtProject = state.app.ctx
     try:
         return compile_sql_code(ctx, sql).compiled_code or ""
@@ -217,7 +217,7 @@ def compile(sql: str) -> str:
 
 
 def make_json_compat(v: t.Any) -> t.Any:
-    """Convert a value to be safe for JSON serialization."""
+    """JSON シリアル化に対して安全になるように値を変換します。"""
     if isinstance(v, decimal.Decimal):
         return float(v)
     if isinstance(v, date):
@@ -228,9 +228,9 @@ def make_json_compat(v: t.Any) -> t.Any:
 
 
 def run_query() -> None:
-    """Run SQL query using dbt context.
+    """dbt コンテキストを使用して SQL クエリを実行します。
 
-    This mutates the state of the app.
+    これにより、アプリの状態が変更されます。
     """
     ctx: DbtProject = state.app.ctx
     sql = state.app.compiled_query
@@ -256,21 +256,21 @@ def run_query() -> None:
 
 
 def build_profile_report(minimal: bool = True) -> ydata_profiling.ProfileReport:
-    """Build a profile report for a given dataframe.
+    """指定されたデータフレームのプロファイルレポートを作成します。
 
-    This is a wrapper around the ydata_profiling library. It is cached to avoid
-    re-running the report every time the user changes the SQL query.
+    これは ydata_profiling ライブラリのラッパーです。
+    ユーザーがSQLクエリを変更するたびにレポートが再実行されるのを避けるためにキャッシュされます。
     """
     return state.app.query_result_df.profile_report(minimal=minimal)
 
 
 def convert_profile_report_to_html(profile: ydata_profiling.ProfileReport) -> str:
-    """Convert a profile report to HTML."""
+    """プロファイル レポートを HTML に変換します。"""
     return profile.to_html()
 
 
 def run_profile(minimal: bool = True) -> None:
-    """Run a profile report and return the HTML report."""
+    """プロファイル レポートを実行し、HTML レポートを返します。"""
     if not state.app.query_result_df.empty:
         state.app.profile_html = convert_profile_report_to_html(build_profile_report(minimal))
 

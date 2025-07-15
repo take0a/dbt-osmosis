@@ -30,7 +30,7 @@ __all__ = [
 
 @dataclass
 class TransformOperation:
-    """An operation to be run on a dbt manifest node."""
+    """dbt マニフェスト ノードで実行される操作。"""
 
     func: t.Callable[..., t.Any]
     name: str
@@ -42,12 +42,12 @@ class TransformOperation:
 
     @property
     def result(self) -> t.Any:
-        """The result of the operation or None."""
+        """操作の結果または None。"""
         return self._result
 
     @property
     def metadata(self) -> MappingProxyType[str, t.Any]:
-        """Metadata about the operation."""
+        """操作に関するメタデータ。"""
         return MappingProxyType(self._metadata)
 
     def __call__(
@@ -55,7 +55,7 @@ class TransformOperation:
         context: t.Any,
         node: ResultNode | None = None,  # YamlRefactorContext
     ) -> TransformOperation:
-        """Run the operation and store the result."""
+        """操作を実行し、結果を保存します。"""
         self._context = context
         self._node = node
         self._metadata["started"] = True
@@ -68,7 +68,7 @@ class TransformOperation:
         return self
 
     def __rshift__(self, next_op: TransformOperation) -> TransformPipeline:
-        """Chain operations together."""
+        """操作を連鎖します。"""
         return TransformPipeline([self]) >> next_op
 
     def __repr__(self) -> str:  # pyright: ignore[reportImplicitOverride]
@@ -77,7 +77,7 @@ class TransformOperation:
 
 @dataclass
 class TransformPipeline:
-    """A pipeline of transform operations to be run on a dbt manifest node."""
+    """dbt マニフェスト ノードで実行される変換操作のパイプライン。"""
 
     operations: list[TransformOperation] = field(default_factory=list)
     commit_mode: t.Literal["none", "batch", "atomic", "defer"] = "batch"
@@ -86,11 +86,11 @@ class TransformPipeline:
 
     @property
     def metadata(self) -> MappingProxyType[str, t.Any]:
-        """Metadata about the pipeline."""
+        """パイプラインに関するメタデータ。"""
         return MappingProxyType(self._metadata)
 
     def __rshift__(self, next_op: TransformOperation | t.Callable[..., t.Any]) -> TransformPipeline:
-        """Chain operations together."""
+        """操作を連鎖します。"""
         if isinstance(next_op, TransformOperation):
             self.operations.append(next_op)
         elif callable(next_op):
@@ -104,7 +104,7 @@ class TransformPipeline:
         context: t.Any,
         node: ResultNode | None = None,  # YamlRefactorContext
     ) -> TransformPipeline:
-        """Run all operations in the pipeline."""
+        """パイプライン内のすべての操作を実行します。"""
         logger.info(
             "\n:gear: [b]Running pipeline[/b] with => %s operations %s \n",
             len(self.operations),
@@ -171,7 +171,7 @@ class TransformPipeline:
 def _transform_op(
     name: str | None = None,
 ) -> t.Callable[[t.Callable[[t.Any, ResultNode | None], None]], TransformOperation]:
-    """Decorator to create a TransformOperation from a function."""
+    """関数から TransformOperation を作成するためのデコレータ。"""
 
     def decorator(
         func: t.Callable[[t.Any, ResultNode | None], None],  # YamlRefactorContext
@@ -186,7 +186,7 @@ def inherit_upstream_column_knowledge(
     context: t.Any,
     node: ResultNode | None = None,  # YamlRefactorContext
 ) -> None:
-    """Inherit column level knowledge from the ancestors of a dbt model or source node."""
+    """dbt モデルまたはソース ノードの祖先から列レベルの知識を継承します。"""
     if node is None:
         logger.info(":wave: Inheriting column knowledge across all matched nodes.")
         from dbt_osmosis.core.node_filters import _iter_candidate_nodes
@@ -236,7 +236,8 @@ def inherit_upstream_column_knowledge(
 
 @_transform_op("Inject Missing Columns")
 def inject_missing_columns(context: t.Any, node: ResultNode | None = None) -> None:
-    """Add missing columns to a dbt node and it's corresponding yaml section. Changes are implicitly buffered until commit_yamls is called."""
+    """不足している列をdbtノードと対応するyamlセクションに追加します。
+    変更は、commit_yamlsが呼び出されるまで暗黙的にバッファリングされます。"""
     from dbt_osmosis.core.introspection import _get_setting_for_node, get_columns
     from dbt_osmosis.core.node_filters import _iter_candidate_nodes
 
@@ -284,7 +285,8 @@ def inject_missing_columns(context: t.Any, node: ResultNode | None = None) -> No
 
 @_transform_op("Remove Extra Columns")
 def remove_columns_not_in_database(context: t.Any, node: ResultNode | None = None) -> None:
-    """Remove columns from a dbt node and it's corresponding yaml section that are not present in the database. Changes are implicitly buffered until commit_yamls is called."""
+    """dbtノードとそれに対応するyamlセクションから、データベースに存在しない列を削除します。
+    変更は、commit_yamlsが呼び出されるまで暗黙的にバッファリングされます。"""
     from dbt_osmosis.core.introspection import get_columns, normalize_column_name
     from dbt_osmosis.core.node_filters import _iter_candidate_nodes
 
@@ -319,7 +321,8 @@ def remove_columns_not_in_database(context: t.Any, node: ResultNode | None = Non
 
 @_transform_op("Sort Columns in DB Order")
 def sort_columns_as_in_database(context: t.Any, node: ResultNode | None = None) -> None:
-    """Sort columns in a dbt node and it's corresponding yaml section as they appear in the database. Changes are implicitly buffered until commit_yamls is called."""
+    """dbtノード内の列と、それに対応するyamlセクションを、データベースに表示されるとおりにソートします。
+    変更は、commit_yamlsが呼び出されるまで暗黙的にバッファリングされます。"""
     from dbt_osmosis.core.introspection import get_columns, normalize_column_name
     from dbt_osmosis.core.node_filters import _iter_candidate_nodes
 
@@ -353,7 +356,8 @@ def sort_columns_as_in_database(context: t.Any, node: ResultNode | None = None) 
 
 @_transform_op("Sort Columns Alphabetically")
 def sort_columns_alphabetically(context: t.Any, node: ResultNode | None = None) -> None:
-    """Sort columns in a dbt node and it's corresponding yaml section alphabetically. Changes are implicitly buffered until commit_yamls is called."""
+    """dbtノードとそれに対応するyamlセクション内の列をアルファベット順に並べ替えます。
+    変更は、commit_yamlsが呼び出されるまで暗黙的にバッファリングされます。"""
     from dbt_osmosis.core.node_filters import _iter_candidate_nodes
 
     if node is None:
@@ -392,7 +396,8 @@ def sort_columns_as_configured(context: t.Any, node: ResultNode | None = None) -
 
 @_transform_op("Synchronize Data Types")
 def synchronize_data_types(context: t.Any, node: ResultNode | None = None) -> None:
-    """Populate data types for columns in a dbt node and it's corresponding yaml section. Changes are implicitly buffered until commit_yamls is called."""
+    """dbtノードとそれに対応するyamlセクションの列のデータ型を設定します。
+    変更は、commit_yamlsが呼び出されるまで暗黙的にバッファリングされます。"""
     from dbt_osmosis.core.introspection import (
         _get_setting_for_node,
         get_columns,
@@ -431,7 +436,7 @@ def synchronize_data_types(context: t.Any, node: ResultNode | None = None) -> No
 def synthesize_missing_documentation_with_openai(
     context: t.Any, node: ResultNode | None = None
 ) -> None:
-    """Synthesize missing documentation for a dbt node using OpenAI's GPT-4o API."""
+    """OpenAI の GPT-4o API を使用して、dbt ノードの不足しているドキュメントを合成します。"""
     import textwrap
 
     from dbt_osmosis.core.node_filters import _iter_candidate_nodes

@@ -28,10 +28,10 @@ __all__ = [
 
 @dataclass
 class RestructureOperation:
-    """Represents a single operation to perform on a YAML file.
+    """YAML ファイルに対して実行する単一の操作を表します。
 
-    This might be CREATE, UPDATE, SUPERSEDE, etc. In a more advanced approach,
-    we might unify multiple steps under a single operation with sub-operations.
+    CREATE、UPDATE、SUPERSEDE などがこれに該当します。
+    より高度なアプローチとしては、サブ操作を使用して複数のステップを単一の操作に統合する場合があります。
     """
 
     file_path: Path
@@ -41,19 +41,19 @@ class RestructureOperation:
 
 @dataclass
 class RestructureDeltaPlan:
-    """Stores all the operations needed to restructure the project."""
+    """プロジェクトの再構築に必要なすべての操作を保存します。"""
 
     operations: list[RestructureOperation] = field(default_factory=list)
 
 
 def _generate_minimal_model_yaml(node: t.Union[ModelNode, SeedNode]) -> dict[str, t.Any]:
-    """Generate a minimal model yaml for a dbt model node."""
+    """dbt モデル ノードの最小限のモデル yaml を生成します。"""
     logger.debug(":baby: Generating minimal yaml for Model/Seed => %s", node.name)
     return {"name": node.name, "columns": []}
 
 
 def _generate_minimal_source_yaml(node: SourceDefinition) -> dict[str, t.Any]:
-    """Generate a minimal source yaml for a dbt source node."""
+    """dbt ソース ノードの最小限のソース yaml を生成します。"""
     logger.debug(":baby: Generating minimal yaml for Source => %s", node.name)
     return {"name": node.source_name, "tables": [{"name": node.name, "columns": []}]}
 
@@ -63,7 +63,7 @@ def _create_operations_for_node(
     uid: str,
     loc: t.Any,  # SchemaFileLocation
 ) -> list[RestructureOperation]:
-    """Create restructure operations for a dbt model or source node."""
+    """dbt モデルまたはソース ノードの再構築操作を作成します。"""
     logger.debug(":bricks: Creating restructure operations for => %s", uid)
     node = context.project.manifest.nodes.get(uid) or context.project.manifest.sources.get(uid)
     if not node:
@@ -128,7 +128,7 @@ def _create_operations_for_node(
 
 
 def draft_restructure_delta_plan(context: t.Any) -> RestructureDeltaPlan:
-    """Draft a restructure plan for the dbt project."""
+    """dbt プロジェクトの再編成計画を起草します。"""
     logger.info(":bulb: Drafting restructure delta plan for the project.")
     plan = RestructureDeltaPlan()
     lock = threading.Lock()
@@ -193,7 +193,7 @@ def draft_restructure_delta_plan(context: t.Any) -> RestructureDeltaPlan:
 
 
 def pretty_print_plan(plan: RestructureDeltaPlan) -> None:
-    """Pretty print the restructure plan for the dbt project."""
+    """dbt プロジェクトの再編成計画をきれいに印刷します。"""
     logger.info(":mega: Restructure plan includes => %s operations.", len(plan.operations))
     for op in plan.operations:
         str_content = str(op.content)[:80] + "..."
@@ -206,7 +206,7 @@ def pretty_print_plan(plan: RestructureDeltaPlan) -> None:
 
 
 def _remove_models(existing_doc: dict[str, t.Any], nodes: list[ResultNode]) -> None:
-    """Clean up the existing yaml doc by removing models superseded by the restructure plan."""
+    """再構築計画によって置き換えられた model を削除して、既存の yaml ドキュメントをクリーンアップします。"""
     logger.debug(":scissors: Removing superseded models => %s", [n.name for n in nodes])
     to_remove = {n.name for n in nodes if n.resource_type == NodeType.Model}
     keep = []
@@ -217,7 +217,7 @@ def _remove_models(existing_doc: dict[str, t.Any], nodes: list[ResultNode]) -> N
 
 
 def _remove_seeds(existing_doc: dict[str, t.Any], nodes: list[ResultNode]) -> None:
-    """Clean up the existing yaml doc by removing models superseded by the restructure plan."""
+    """再構築計画によって置き換えられた seed を削除して、既存の yaml ドキュメントをクリーンアップします。"""
     logger.debug(":scissors: Removing superseded seeds => %s", [n.name for n in nodes])
     to_remove = {n.name for n in nodes if n.resource_type == NodeType.Seed}
     keep = []
@@ -228,7 +228,7 @@ def _remove_seeds(existing_doc: dict[str, t.Any], nodes: list[ResultNode]) -> No
 
 
 def _remove_sources(existing_doc: dict[str, t.Any], nodes: list[ResultNode]) -> None:
-    """Clean up the existing yaml doc by removing sources superseded by the restructure plan."""
+    """再構築計画によって置き換えられた source を削除して、既存の yaml ドキュメントをクリーンアップします。"""
     to_remove_sources = {
         (n.source_name, n.name) for n in nodes if n.resource_type == NodeType.Source
     }
@@ -248,7 +248,7 @@ def _remove_sources(existing_doc: dict[str, t.Any], nodes: list[ResultNode]) -> 
 def apply_restructure_plan(
     context: t.Any, plan: RestructureDeltaPlan, *, confirm: bool = False
 ) -> None:
-    """Apply the restructure plan for the dbt project."""
+    """dbt プロジェクトの再編成計画を適用します。"""
     if not plan.operations:
         logger.info(":white_check_mark: No changes needed in the restructure plan.")
         return

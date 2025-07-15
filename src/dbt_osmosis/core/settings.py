@@ -21,67 +21,67 @@ __all__ = [
 ]
 
 EMPTY_STRING = ""
-"""A null string constant for use in placeholder lists, this is always considered undocumented"""
+"""プレースホルダリストで使用するためのヌル文字列定数。これは常に文書化されていないものとみなされます。"""
 
 
 @dataclass
 class YamlRefactorSettings:
-    """Settings for yaml based refactoring operations."""
+    """yaml ベースのリファクタリング操作の設定。"""
 
     fqn: list[str] = field(default_factory=list)
-    """Filter models to action via a fully qualified name match such as returned by `dbt ls`."""
+    """`dbt ls` によって返されるような完全修飾名の一致を介してモデルをアクションにフィルターします。"""
     models: list[Path | str] = field(default_factory=list)
-    """Filter models to action via a file path match."""
+    """ファイル パスの一致を介してモデルをアクションにフィルターします。"""
     dry_run: bool = False
-    """Do not write changes to disk."""
+    """変更をディスクに書き込まないでください。"""
     skip_merge_meta: bool = False
-    """Skip merging upstream meta fields in the yaml files."""
+    """yaml ファイル内のアップストリーム メタ フィールドのマージをスキップします。"""
     skip_add_columns: bool = False
-    """Skip adding missing columns in the yaml files."""
+    """yaml ファイルに不足している列の追加をスキップします。"""
     skip_add_tags: bool = False
-    """Skip appending upstream tags in the yaml files."""
+    """yaml ファイルにアップストリーム タグを追加することをスキップします。"""
     skip_add_data_types: bool = False
-    """Skip adding data types in the yaml files."""
+    """yaml ファイルへのデータ型の追加をスキップします。"""
     skip_add_source_columns: bool = False
-    """Skip adding columns in the source yaml files specifically."""
+    """ソース yaml ファイル内の列の追加を具体的にスキップします。"""
     add_progenitor_to_meta: bool = False
-    """Add a custom progenitor field to the meta section indicating a column's origin."""
+    """列の起源を示すカスタム祖先フィールドをメタセクションに追加します。"""
     numeric_precision_and_scale: bool = False
-    """Include numeric precision in the data type."""
+    """データ型に数値精度を含めます。"""
     string_length: bool = False
-    """Include character length in the data type."""
+    """データ型に文字の長さを含めます。"""
     force_inherit_descriptions: bool = False
-    """Force inheritance of descriptions from upstream models, even if node has a valid description."""
+    """ノードに有効な説明がある場合でも、上流モデルからの説明の継承を強制します。"""
     use_unrendered_descriptions: bool = False
-    """Use unrendered descriptions preserving things like {{ doc(...) }} which are otherwise pre-rendered in the manifest object"""
+    """{{ doc(...) }} などの、マニフェスト オブジェクトで事前にレンダリングされるものを保持したレンダリングされていない説明を使用します。"""
     add_inheritance_for_specified_keys: list[str] = field(default_factory=list)
-    """Include additional keys in the inheritance process."""
+    """継承プロセスに追加のキーを含めます。"""
     output_to_lower: bool = False
-    """Force column name and data type output to lowercase in the yaml files."""
+    """yaml ファイル内の列名とデータ型の出力を小文字に強制します。"""
     catalog_path: str | None = None
-    """Path to the dbt catalog.json file to use preferentially instead of live warehouse introspection"""
+    """ライブ ウェアハウス イントロスペクションの代わりに優先的に使用する dbt catalog.json ファイルへのパス"""
     create_catalog_if_not_exists: bool = False
-    """Generate the catalog.json for the project if it doesn't exist and use it for introspective queries."""
+    """プロジェクトの catalog.json が存在しない場合は生成し、イントロスペクト クエリに使用します。"""
 
 
 @dataclass
 class YamlRefactorContext:
-    """A data object that includes references to:
+    """以下の参照を含むデータオブジェクト:
 
-    - The dbt project context
-    - The yaml refactor settings
-    - A thread pool executor
-    - A ruamel.yaml instance
-    - A tuple of placeholder strings
-    - The mutation count incremented during refactoring operations
+    - dbt プロジェクト コンテキスト
+    - yaml リファクタリング設定
+    - スレッドプール エグゼキューター
+    - ruamel.yaml インスタンス
+    - プレースホルダ文字列のタプル
+    - リファクタリング操作中に増加したミューテーション数
     """
 
-    project: DbtProjectContext  # Forward reference to avoid circular import
+    project: DbtProjectContext  # 循環インポートを避けるための前方参照
     settings: YamlRefactorSettings = field(default_factory=YamlRefactorSettings)
     pool: ThreadPoolExecutor = field(default_factory=ThreadPoolExecutor)
     yaml_handler: ruamel.yaml.YAML = field(
         default_factory=lambda: None
-    )  # Will be set in __post_init__
+    )  # __post_init__ で設定されます
     yaml_handler_lock: threading.Lock = field(default_factory=threading.Lock)
 
     placeholders: tuple[str, ...] = (
@@ -96,7 +96,7 @@ class YamlRefactorContext:
     _catalog: CatalogResults | None = field(default=None, init=False)
 
     def register_mutations(self, count: int) -> None:
-        """Increment the mutation count by a specified amount."""
+        """指定した量だけ mutation_count を増やします。"""
         logger.debug(
             ":sparkles: Registering %s new mutations. Current count => %s",
             count,
@@ -106,19 +106,19 @@ class YamlRefactorContext:
 
     @property
     def mutation_count(self) -> int:
-        """Read only property to access the mutation count."""
+        """ミューテーションカウントにアクセスするための読み取り専用プロパティ。"""
         return self._mutation_count
 
     @property
     def mutated(self) -> bool:
-        """Check if the context has performed any mutations."""
+        """コンテキストが変更を実行したかどうかを確認します。"""
         has_mutated = self._mutation_count > 0
         logger.debug(":white_check_mark: Has the context mutated anything? => %s", has_mutated)
         return has_mutated
 
     @property
     def source_definitions(self) -> dict[str, t.Any]:
-        """The source definitions from the dbt project config."""
+        """dbt プロジェクト構成からのソース定義。"""
         c = self.project.runtime_cfg.vars.to_dict()
         toplevel_conf = self._find_first(
             [c.get(k, {}) for k in ["dbt-osmosis", "dbt_osmosis"]], lambda v: bool(v), {}
@@ -127,7 +127,7 @@ class YamlRefactorContext:
 
     @property
     def ignore_patterns(self) -> list[str]:
-        """The column name ignore patterns from the dbt project config."""
+        """列名は、dbt プロジェクト構成からのパターンを無視します。"""
         c = self.project.runtime_cfg.vars.to_dict()
         toplevel_conf = self._find_first(
             [c.get(k, {}) for k in ["dbt-osmosis", "dbt_osmosis"]], lambda v: bool(v), {}
@@ -136,7 +136,7 @@ class YamlRefactorContext:
 
     @property
     def yaml_settings(self) -> dict[str, t.Any]:
-        """The column name ignore patterns from the dbt project config."""
+        """列名は、dbt プロジェクト構成からのパターンを無視します。"""
         c = self.project.runtime_cfg.vars.to_dict()
         toplevel_conf = self._find_first(
             [c.get(k, {}) for k in ["dbt-osmosis", "dbt_osmosis"]], lambda v: bool(v), {}
@@ -144,7 +144,7 @@ class YamlRefactorContext:
         return toplevel_conf.get("yaml_settings", {})
 
     def read_catalog(self) -> CatalogResults | None:
-        """Read the catalog file if it exists."""
+        """カタログ ファイルが存在する場合はそれを読み取ります。"""
         logger.debug(":mag: Checking if catalog is already loaded => %s", bool(self._catalog))
         if not self._catalog:
             from dbt_osmosis.core.introspection import _generate_catalog, _load_catalog
@@ -161,7 +161,7 @@ class YamlRefactorContext:
     def _find_first(
         self, coll: t.Iterable[t.Any], predicate: t.Callable[[t.Any], bool], default: t.Any = None
     ) -> t.Any:
-        """Find the first item in a container that satisfies a predicate."""
+        """述語を満たすコンテナー内の最初の項目を検索します。"""
         for item in coll:
             if predicate(item):
                 return item
@@ -171,7 +171,7 @@ class YamlRefactorContext:
         logger.debug(":green_book: Running post-init for YamlRefactorContext.")
         if EMPTY_STRING not in self.placeholders:
             self.placeholders = (EMPTY_STRING, *self.placeholders)
-        # Initialize yaml_handler here
+        # ここでyaml_handlerを初期化します
         from dbt_osmosis.core.schema.parser import create_yaml_instance
 
         self.yaml_handler = create_yaml_instance()

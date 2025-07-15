@@ -1,5 +1,5 @@
 # pyright: reportAny=false
-"""Logging module for dbt-osmosis. The module itself can be used as a logger as it proxies calls to the default LOGGER instance."""
+"""dbt-osmosis のロギングモジュール。このモジュール自体は、デフォルトの LOGGER インスタンスへの呼び出しをプロキシするため、ロガーとして使用できます。"""
 
 from __future__ import annotations
 
@@ -18,7 +18,8 @@ _LOGGING_LEVEL = logging.INFO
 
 
 def get_rotating_log_handler(name: str, path: Path, formatter: str) -> RotatingFileHandler:
-    """This handler writes warning and higher level outputs to logs in a home .dbt-osmosis directory rotating them as needed"""
+    """このハンドラは、ホームの.dbt-osmosisディレクトリのログに警告と高レベルの出力を書き込み、
+    必要に応じてそれらをローテーションします。"""
     path.mkdir(parents=True, exist_ok=True)
     handler = RotatingFileHandler(
         str(path / f"{name}.log"),
@@ -37,18 +38,18 @@ def get_logger(
     path: Path = _LOG_PATH,
     formatter: str = _LOG_FILE_FORMAT,
 ) -> logging.Logger:
-    """Builds and caches loggers. Can be configured with module level attributes or on a call by call basis.
+    """ロガーを構築してキャッシュします。モジュールレベルの属性、または呼び出しごとに設定できます。
 
-    Simplifies logger management without having to instantiate separate pointers in each module.
+    各モジュールで個別のポインタをインスタンス化する必要がなく、ロガー管理が簡素化されます。
 
     Args:
-        name (str, optional): Logger name, also used for output log file name in `~/.dbt-osmosis/logs` directory.
-        level (Union[int, str], optional): Logging level, this is explicitly passed to console handler which effects what level of log messages make it to the console. Defaults to logging.INFO.
-        path (Path, optional): Path for output warning level+ log files. Defaults to `~/.dbt-osmosis/logs`
-        formatter (str, optional): Format for output log files. Defaults to a "time — name — level — message" format
+        name (str, optional): ロガー名。`~/.dbt-osmosis/logs` ディレクトリ内の出力ログファイル名にも使用されます。
+        level (Union[int, str], optional): ログレベル。コンソールハンドラーに明示的に渡され、コンソールに出力されるログメッセージのレベルを決定します。デフォルトはlogging.INFOです。
+        path (Path, optional): 警告レベル+のログファイルを出力するパス。デフォルトは `~/.dbt-osmosis/logs` です。
+        formatter (str, optional): 出力ログファイルの形式。デフォルトは "time — name — level — message" 形式です。
 
     Returns:
-        logging.Logger: Prepared logger with rotating logs and console streaming. Can be executed directly from function.
+        logging.Logger: ログのローテーションとコンソールストリーミングを備えたロガーを用意しました。関数から直接実行できます。
     """
     if isinstance(level, str):
         level = getattr(logging, level, logging.INFO)
@@ -69,11 +70,11 @@ def get_logger(
 
 
 LOGGER = get_logger()
-"""Default logger for dbt-osmosis"""
+"""dbt-osmosis のデフォルトロガー"""
 
 
 def set_log_level(level: t.Union[int, str]) -> None:
-    """Set the log level for the default logger"""
+    """デフォルトのロガーのログレベルを設定する"""
     global LOGGER
     if isinstance(level, str):
         level = getattr(logging, level, logging.INFO)
@@ -85,7 +86,7 @@ def set_log_level(level: t.Union[int, str]) -> None:
 
 
 class LogMethod(t.Protocol):
-    """Protocol for logger methods"""
+    """ロガーメソッドのプロトコル"""
 
     def __call__(self, msg: t.Any, /, *args: t.Any, **kwds: t.Any) -> t.Any: ...
 

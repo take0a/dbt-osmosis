@@ -40,7 +40,10 @@ disable_tracking()
 
 
 def discover_project_dir() -> str:
-    """Return the directory containing a dbt_project.yml if found, else the current dir. Checks DBT_PROJECT_DIR first if set."""
+    """dbt_project.yml を含むディレクトリが見つかった場合はそのディレクトリを返し、
+    見つからない場合は現在のディレクトリを返します。
+    設定されている場合、まず DBT_PROJECT_DIR をチェックします。
+    """
     if "DBT_PROJECT_DIR" in os.environ:
         project_dir = Path(os.environ["DBT_PROJECT_DIR"])
         if project_dir.is_dir():
@@ -57,7 +60,10 @@ def discover_project_dir() -> str:
 
 
 def discover_profiles_dir() -> str:
-    """Return the directory containing a profiles.yml if found, else ~/.dbt. Checks DBT_PROFILES_DIR first if set."""
+    """profiles.yml を含むディレクトリが見つかった場合はそのディレクトリを返し、
+    見つからない場合は ~/.dbt を返します。
+    DBT_PROFILES_DIR が設定されている場合は、まずそれがチェックされます。
+    """
     if "DBT_PROFILES_DIR" in os.environ:
         profiles_dir = Path(os.environ["DBT_PROFILES_DIR"])
         if profiles_dir.is_dir():
@@ -74,7 +80,7 @@ def discover_profiles_dir() -> str:
 
 @dataclass
 class DbtConfiguration:
-    """Configuration for a dbt project."""
+    """dbt プロジェクトの構成。"""
 
     project_dir: str = field(default_factory=discover_project_dir)
     profiles_dir: str = field(default_factory=discover_profiles_dir)
@@ -94,7 +100,7 @@ class DbtConfiguration:
 
 
 def config_to_namespace(cfg: DbtConfiguration) -> argparse.Namespace:
-    """Convert a DbtConfiguration into a dbt-friendly argparse.Namespace."""
+    """DbtConfiguration を dbt 対応の argparse.Namespace に変換します。"""
     logger.debug(":blue_book: Converting DbtConfiguration to argparse.Namespace => %s", cfg)
     ns = argparse.Namespace(
         project_dir=cfg.project_dir,
@@ -114,28 +120,29 @@ def config_to_namespace(cfg: DbtConfiguration) -> argparse.Namespace:
 
 @dataclass
 class DbtProjectContext:
-    """A data object that includes references to:
+    """以下の参照を含むデータオブジェクト:
 
-    - The loaded dbt config
-    - The manifest
-    - The sql/macro parsers
+    - ロードされた dbt 構成
+    - マニフェスト
+    - SQL/マクロパーサー
 
-    With mutexes for thread safety. The adapter is lazily instantiated and has a TTL which allows
-    for re-use across multiple operations in long-running processes. (is the idea)
+    スレッドセーフのためのミューテックスを備えています。
+    アダプタは遅延インスタンス化され、TTL を持つため、
+    長時間実行されるプロセスにおける複数の操作間で再利用できます。(これがアイデアです)
     """
 
     config: DbtConfiguration
-    """The configuration for the dbt project used to initialize the runtime cfg and manifest"""
+    """ランタイム cfg とマニフェストを初期化するために使用される dbt プロジェクトの構成"""
     runtime_cfg: RuntimeConfig
-    """The dbt project runtime config associated with the context"""
+    """コンテキストに関連付けられた dbt プロジェクト ランタイム構成"""
     manifest: Manifest
-    """The dbt project manifest"""
+    """dbtプロジェクトマニフェスト"""
     sql_parser: SqlBlockParser
-    """Parser for dbt Jinja SQL blocks"""
+    """dbt Jinja SQL ブロックのパーサー"""
     macro_parser: SqlMacroParser
-    """Parser for dbt Jinja macros"""
+    """dbt Jinja マクロのパーサー"""
     connection_ttl: float = 3600.0
-    """Max time in seconds to keep a db connection alive before recycling it, mostly useful for very long runs"""
+    """DB 接続をリサイクルする前に接続を維持する最大時間（秒）。主に非常に長い実行時に役立ちます。"""
 
     _adapter_mutex: threading.Lock = field(default_factory=threading.Lock, init=False)
     _manifest_mutex: threading.Lock = field(default_factory=threading.Lock, init=False)
@@ -144,7 +151,7 @@ class DbtProjectContext:
 
     @property
     def is_connection_expired(self) -> bool:
-        """Check if the adapter has expired based on the adapter TTL."""
+        """アダプタの TTL に基づいて、アダプタの有効期限が切れているかどうかを確認します。"""
         expired = (
             time.time() - self._connection_created_at.setdefault(get_ident(), 0.0)
             > self.connection_ttl
@@ -154,7 +161,8 @@ class DbtProjectContext:
 
     @property
     def adapter(self) -> BaseAdapter:
-        """Get the adapter instance, creating a new one if the current one has expired."""
+        """アダプタ インスタンスを取得し、
+        現在のインスタンスの有効期限が切れている場合は新しいインスタンスを作成します。"""
         with self._adapter_mutex:
             if not self._adapter:
                 logger.info(":wrench: Instantiating new adapter because none is currently set.")
@@ -180,14 +188,14 @@ class DbtProjectContext:
 
     @property
     def manifest_mutex(self) -> threading.Lock:
-        """Return the manifest mutex for thread safety."""
+        """スレッドの安全性を確保するためにマニフェスト ミューテックスを返します。"""
         return self._manifest_mutex
 
 
 def _add_cross_project_references(
     manifest: Manifest, dbt_loom: ModuleType, project_name: str
 ) -> Manifest:
-    """Add cross-project references to the dbt manifest from dbt-loom defined manifests."""
+    """dbt-loom で定義されたマニフェストから dbt マニフェストへのプロジェクト間参照を追加します。"""
     loomnodes: list[t.Any] = []
     loom = dbt_loom.dbtLoom(project_name)
     loom_manifests = loom.manifests
@@ -210,7 +218,7 @@ def _add_cross_project_references(
 
 
 def _instantiate_adapter(runtime_config: RuntimeConfig) -> BaseAdapter:
-    """Instantiate a dbt adapter based on the runtime configuration."""
+    """ランタイム構成に基づいて dbt アダプターをインスタンス化します。"""
     logger.debug(":mag: Registering adapter for runtime config => %s", runtime_config)
     adapter = get_adapter(runtime_config)
     adapter.set_macro_context_generator(t.cast(t.Any, generate_runtime_macro_context))
@@ -220,7 +228,7 @@ def _instantiate_adapter(runtime_config: RuntimeConfig) -> BaseAdapter:
 
 
 def create_dbt_project_context(config: DbtConfiguration) -> DbtProjectContext:
-    """Build a DbtProjectContext from a DbtConfiguration."""
+    """DbtConfiguration から DbtProjectContext を構築します。"""
     logger.info(":wave: Creating DBT project context using config => %s", config)
     args = config_to_namespace(config)
     dbt_flags.set_from_args(args, args)
@@ -264,7 +272,7 @@ def create_dbt_project_context(config: DbtConfiguration) -> DbtProjectContext:
 
 
 def _reload_manifest(context: DbtProjectContext) -> None:
-    """Reload the dbt project manifest. Useful for picking up mutations."""
+    """dbt プロジェクトマニフェストを再読み込みします。ミューテーションの取得に役立ちます。"""
     logger.info(":arrows_counterclockwise: Reloading the dbt project manifest!")
     loader = ManifestLoader(context.runtime_cfg, context.runtime_cfg.load_dependencies())
     manifest = loader.load()

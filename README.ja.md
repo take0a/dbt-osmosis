@@ -11,47 +11,47 @@
 [![Scc Count Badge](https://sloc.xyz/github/z3z1ma/dbt-osmosis/)](https://github.com/z3z1ma/dbt-osmosis/)
 [![Scc Count Badge](https://sloc.xyz/github/z3z1ma/dbt-osmosis/?category=cocomo)](https://github.com/z3z1ma/dbt-osmosis/)
 
-## New to dbt-osmosis?
+## dbt-osmosis は初めてですか？
 
-We now have a spiffy [dbt-osmosis documentation site](https://z3z1ma.github.io/dbt-osmosis/)! 🎉
+[dbt-osmosis のドキュメントサイト](https://z3z1ma.github.io/dbt-osmosis/)ができました！🎉
 
-Please check it out for a more in-depth introduction to dbt-osmosis. 👇
+dbt-osmosis のより詳しい解説については、ぜひこちらをご覧ください。👇
 
 [![dbt-osmosis](/screenshots/docs_site.png)](https://z3z1ma.github.io/dbt-osmosis/)
 
-## Migrating from 0.x.x to 1.x.x?
+## 0.x.x から 1.x.x への移行をお考えですか？
 
-We have a [migration guide](https://z3z1ma.github.io/dbt-osmosis/docs/migrating) to help you out. 🚀
+[移行ガイド](https://z3z1ma.github.io/dbt-osmosis/docs/migrating)をご用意しております。🚀
 
-## What is dbt-osmosis?
+## dbt-osmosisとは？
 
-Hello and welcome to the project! [dbt-osmosis](https://github.com/z3z1ma/dbt-osmosis) 🌊 serves to enhance the developer experience significantly. We do this through providing 4 core features:
+こんにちは、プロジェクトへようこそ！[dbt-osmosis](https://github.com/z3z1ma/dbt-osmosis)🌊は、開発者エクスペリエンスを大幅に向上させます。4つのコア機能を提供することで、これを実現します。
 
-1. Automated schema YAML management.
+1. スキーマYAMLの自動管理。
 
     1a. `dbt-osmosis yaml refactor --project-dir ... --profiles-dir ...`
 
-    > Automatically generate documentation based on upstream documented columns, organize yaml files based on configurable rules defined in dbt_project.yml, scaffold new yaml files based on the same rules, inject columns from data warehouse schema if missing in yaml and remove columns no longer present in data warehouse (organize -> document)
+    > アップストリームでドキュメント化された列に基づいてドキュメントを自動的に生成し、dbt_project.yml で定義された構成可能なルールに基づいて yaml ファイルを整理し、同じルールに基づいて新しい yaml ファイルをスキャフォールディングし、yaml に欠落している場合はデータ ウェアハウス スキーマから列を挿入し、データ ウェアハウスに存在しなくなった列を削除します (整理 -> ドキュメント)
 
     1b. `dbt-osmosis yaml organize --project-dir ... --profiles-dir ...`
 
-    > Organize yaml files based on configurable rules defined in dbt_project.yml, scaffold new yaml files based on the same rules (no documentation changes)
+    > dbt_project.yml で定義された設定可能なルールに基づいて yaml ファイルを整理し、同じルールに基づいて新しい yaml ファイルをスキャフォールディングします (ドキュメントの変更はありません)
 
     1c. `dbt-osmosis yaml document --project-dir ... --profiles-dir ...`
 
-    > Automatically generate documentation based on upstream documented columns (no reorganization)
+    > 上流の文書化された列に基づいてドキュメントを自動的に生成する（再編成なし）
 
-2. Workbench for dbt Jinja SQL. This workbench is powered by streamlit and the badge at the top of the readme will take you to a demo on streamlit cloud with jaffle_shop loaded (requires extra `pip install "dbt-osmosis[workbench]"`).
+2. dbt Jinja SQL用のワークベンチ。このワークベンチはstreamlitを利用しており、readmeの上部にあるバッジをクリックすると、jaffle_shopがロードされたstreamlitクラウド上のデモにアクセスできます（追加の`pip install "dbt-osmosis[workbench]"`が必要です）。
 
     2a. `dbt-osmosis workbench --project-dir ... --profiles-dir ...`
 
-    > Spins up a streamlit app. This workbench offers similar functionality to the osmosis server + power-user combo without a reliance on VS code. Realtime compilation, query execution, pandas profiling all via copying and pasting whatever you are working on into the workbenchat your leisure. Spin it up and down as needed.
+    > 効率の良いアプリを立ち上げましょう。このワークベンチは、VS Codeに依存せずに、Osmosisサーバーとパワーユーザー向けの機能を組み合わせたものと同様の機能を提供します。リアルタイムコンパイル、クエリ実行、Pandasプロファイリングなど、作業中のあらゆるものをワークベンチにコピー＆ペーストするだけで、すべて簡単に実行できます。必要に応じて、アプリの起動と停止を切り替えてください。
 
 ____
 
-## Pre-commit
+## コミット前
 
-You can use dbt-osmosis as a pre-commit hook. This will run the `dbt-osmosis yaml refactor` command on your models directory before each commit. This is one way to ensure that your schema.yml files are always up to date. I would recommend reading the docs for more information on what this command does.
+dbt-osmosis をコミット前フックとして使用できます。これにより、各コミットの前にモデルディレクトリで `dbt-osmosis yaml refactor` コマンドが実行されます。これは、schema.yml ファイルを常に最新の状態に保つ方法の一つです。このコマンドの機能の詳細については、ドキュメントを参照することをお勧めします。
 
 ```yaml title=".pre-commit-config.yaml"
 repos:
@@ -66,13 +66,13 @@ repos:
 
 ___
 
-## Workbench
+## ワークベンチ
 
-The workbench is a streamlit app that allows you to work on dbt models in a side-by-side editor and query tester. I've kept this portion of the README since users can jump into the streamlit hosted workbench to play around with it via the badge below. Expect the living documentation moving forward to exist at the [dbt-osmosis documentation site](https://z3z1ma.github.io/dbt-osmosis/).
+ワークベンチは、並列エディタとクエリテスターを使用して dbt モデルを操作できる Streamlit アプリです。ユーザーは下のバッジから Streamlit ホストのワークベンチにアクセスして実際に操作できるため、README のこの部分はそのまま残しました。今後のドキュメントは [dbt-osmosis ドキュメントサイト](https://z3z1ma.github.io/dbt-osmosis/) で公開される予定です。
 
-I also expect there is some untapped value in the workbench that is only pending some time from myself. I've seen a path to a truly novel development experience and look forward to exploring it.
+また、ワークベンチには、私自身が時間をかけて開発するだけの、まだ活用されていない価値があると考えています。真に革新的な開発体験への道筋が見えてきたので、その探求を楽しみにしています。
 
-Demo the workbench 👇
+ワークベンチのデモはこちら 👇
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dbt-osmosis-playground.streamlit.app/)
 
@@ -84,41 +84,41 @@ pip install "dbt-osmosis[workbench]"
 dbt-osmosis workbench
 ```
 
-Press "r" to reload the workbench at any time.
+いつでも「r」キーを押せば、ワークベンチをリロードできます。
 
-✔️ dbt Editor with instant dbt compilation side-by-side or pivoted
+✔️ dbt エディタで、dbt のコンパイル結果を並べて表示したり、ピボット表示したりできます。
 
-✔️ Full control over model and workbench theme, light and dark mode
+✔️ モデルとワークベンチのテーマ、ライトモードとダークモードを完全に制御できます。
 
-✔️ Query Tester, test the model you are working on for instant feedback
+✔️ クエリテスターで、作業中のモデルをテストし、即座にフィードバックを得ることができます。
 
-✔️ Data Profiler (leverages pandas-profiling)
+✔️ データプロファイラー（pandas プロファイリングを活用）
 
-**Editor**
+**エディタ**
 
-The editor is able to compile models with control+enter or dynamically as you type. Its speedy! You can choose any target defined in your profiles yml for compilation and execution.
+エディタは、Ctrl + Enter キーを押すか、入力時に動的にモデルをコンパイルできます。非常に高速です！コンパイルと実行には、profiles yml で定義された任意のターゲットを選択できます。
 
-![editor](/screenshots/osmosis_editor_main.png?raw=true "dbt-osmosis Workbench")
+![エディタ](/screenshots/osmosis_editor_main.png?raw=true "dbt-osmosis Workbench")
 
-You can pivot the editor for a fuller view while workbenching some dbt SQL.
+dbt SQL をワークベンチで実行しているときに、エディタをピボット表示して全体像を把握できます。
 
-![pivot](/screenshots/osmosis_editor_pivot.png?raw=true "dbt-osmosis Pivot Layout")
+![pivot](/screenshots/osmosis_editor_pivot.png?raw=true "dbt-osmosis ピボットレイアウト")
 
-**Test Query**
+**テストクエリ**
 
-Test dbt models as you work against whatever profile you have selected and inspect the results. This allows very fast iterative feedback loops not possible with VS Code alone.
+選択したプロファイルに対して dbt モデルをテストし、結果を確認します。これにより、VS Code だけでは実現できない、非常に高速な反復的なフィードバックループを実現できます。
 
-![test-model](/screenshots/osmosis_tester.png?raw=true "dbt-osmosis Test Model")
+![test-model](/screenshots/osmosis_tester.png?raw=true "dbt-osmosis テストモデル")
 
-**Profile Model Results**
+**モデル結果のプロファイル**
 
-Profile your datasets on the fly while you develop without switching context. Allows for more refined interactive data modelling when dataset fits in memory.
+開発中にコンテキストを切り替えることなく、データセットを即座にプロファイルできます。データセットがメモリに収まる場合、より洗練されたインタラクティブなデータモデリングが可能になります。
 
-![profile-data](/screenshots/osmosis_profile.png?raw=true "dbt-osmosis Profile Data")
+![profile-data](/screenshots/osmosis_profile.png?raw=true "dbt-osmosis プロファイルデータ")
 
-**Useful Links and RSS Feed**
+**便利なリンクと RSS フィード**
 
-Some useful links and RSS feeds at the bottom. 🤓
+下部に便利なリンクと RSS フィードがあります。🤓
 
 ![profile-data](/screenshots/osmosis_links.png?raw=true "dbt-osmosis Profile Data")
 

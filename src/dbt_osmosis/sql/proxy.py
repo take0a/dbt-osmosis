@@ -1,5 +1,5 @@
 # pyright: reportMissingTypeStubs=false, reportAny=false, reportImplicitOverride=false, reportUnknownMemberType=false, reportUnusedImport=false, reportUnknownParameterType=false
-"""Proxy server experiment that any MySQL client (including BI tools) can connect to."""
+"""あらゆる MySQL クライアント (BI ツールを含む) が接続できるプロキシ サーバー実験。"""
 
 import asyncio
 import functools
@@ -42,7 +42,7 @@ ALTER_TABLE_COMMENT = re.compile(
 
 
 def _regex_parse_to_complete_dict(sql: str, pattern: re.Pattern[str]) -> dict[str, str] | None:
-    """Parse a SQL statement using a regex pattern and return a dict with the matched groups ensuring all are present"""
+    """正規表現パターンを使用してSQL文を解析し、一致するグループがすべて存在することを確認した辞書を返します。"""
     if match := pattern.match(sql):
         result = match.groupdict()
         if all(result.values()):
@@ -68,10 +68,10 @@ class DbtSession(Session):
         return [e for e in self.dialect().parse(sql) if e]
 
     async def _alter_table_comment_middleware(self, q: Query) -> AllowedResult:
-        """Intercept ALTER TABLE ... MODIFY COLUMN ... COMMENT statements
+        """ALTER TABLE ... MODIFY COLUMN ... COMMENT 文をインターセプトします。
 
-        This middleware will update the column description in the dbt project manifest. Eventually
-        it could use our Yaml context class to actually write the changes to disk.
+        このミドルウェアは、dbt プロジェクトマニフェスト内の列の説明を更新します。
+        最終的には、Yaml コンテキストクラスを使用して、変更内容をディスクに書き込むことも可能です。
         """
         if isinstance(q.expression, exp.Command):
             lower_sql = q.sql.lower()
@@ -132,7 +132,7 @@ class DbtSession(Session):
 
 
 def mapping_to_columns(schema: dict[str, t.Any]) -> Iterator[Column]:
-    """Convert a schema mapping into a list of Column instances"""
+    """スキーママッピングを列インスタンスのリストに変換する"""
     depth = dict_depth(schema)
     if depth < 2:
         return
