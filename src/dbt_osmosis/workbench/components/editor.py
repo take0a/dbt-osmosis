@@ -1,4 +1,4 @@
-# pyright: reportAny=false, reportImplicitOverride=false
+# pyright: reportImplicitOverride=false
 import typing as t
 from enum import Enum
 from functools import partial

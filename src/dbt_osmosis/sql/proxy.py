@@ -1,4 +1,4 @@
-# pyright: reportMissingTypeStubs=false, reportAny=false, reportImplicitOverride=false, reportUnknownMemberType=false, reportUnusedImport=false, reportUnknownParameterType=false
+# pyright: reportMissingTypeStubs=false, reportImplicitOverride=false, reportUnknownMemberType=false, reportUnusedImport=false, reportUnknownParameterType=false
 """あらゆる MySQL クライアント (BI ツールを含む) が接続できるプロキシ サーバー実験。"""
 
 import asyncio

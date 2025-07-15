@@ -281,3 +281,13 @@ _reload_manifest
 - タプルのリストでバリエーション指定もできる
 - VSCode のテストアイコンは、デコレータを含めた関数の先頭に付く
 
+# チェック
+## Pylance のエラー
+- うざいので削除する
+    - "reportAny" は pyright コメントの不明な診断規則です
+    - "reportUnusedParameter" は pyright コメントの不明な診断規則です
+
+```sh
+$ uv run ruff check .
+All checks passed!
+```

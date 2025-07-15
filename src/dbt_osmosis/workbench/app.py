@@ -1,4 +1,4 @@
-# pyright: reportMissingTypeStubs=false, reportAny=false, reportUnusedCallResult=false, reportUnknownMemberType=false, reportUntypedFunctionDecorator=false
+# pyright: reportMissingTypeStubs=false, reportUnusedCallResult=false, reportUnknownMemberType=false, reportUntypedFunctionDecorator=false
 import argparse
 import decimal
 import os

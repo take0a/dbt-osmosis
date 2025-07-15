@@ -1,4 +1,4 @@
-# pyright: reportAny=false, reportImplicitOverride=false
+# pyright: reportImplicitOverride=false
 import typing as t
 from hashlib import md5
 

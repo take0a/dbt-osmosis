@@ -1,4 +1,4 @@
-# pyright: reportUnknownVariableType=false, reportPrivateImportUsage=false, reportAny=false, reportUnknownMemberType=false
+# pyright: reportUnknownVariableType=false, reportPrivateImportUsage=false, reportUnknownMemberType=false
 """下位互換性インポートを備えた dbt-osmosis コア モジュール。"""
 
 from __future__ import annotations

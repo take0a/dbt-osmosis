@@ -1,4 +1,4 @@
-# pyright: reportAny=false, reportUnknownMemberType=false, reportPrivateUsage=false
+# pyright: reportUnknownMemberType=false, reportPrivateUsage=false
 import json
 import typing as t
 from pathlib import Path

@@ -1,4 +1,4 @@
-# pyright: reportAny=false, reportImplicitOverride=false
+# pyright: reportImplicitOverride=false
 import typing as t
 
 from streamlit import session_state as state

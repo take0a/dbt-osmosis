@@ -1,4 +1,3 @@
-# pyright: reportAny=false
 """dbt-osmosis のロギングモジュール。このモジュール自体は、デフォルトの LOGGER インスタンスへの呼び出しをプロキシするため、ロガーとして使用できます。"""
 
 from __future__ import annotations
