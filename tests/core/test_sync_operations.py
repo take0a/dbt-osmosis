@@ -13,7 +13,7 @@ from dbt_osmosis.core.schema.writer import commit_yamls
 @pytest.fixture(scope="module")
 def yaml_context() -> YamlRefactorContext:
     """
-    Creates a YamlRefactorContext for the real 'demo_duckdb' project.
+    実際の「demo duckdb」プロジェクト用の Yaml リファクタリング コンテキストを作成します。
     """
     cfg = DbtConfiguration(project_dir="demo_duckdb", profiles_dir="demo_duckdb")
     cfg.vars = {"dbt-osmosis": {}}
@@ -32,7 +32,7 @@ def yaml_context() -> YamlRefactorContext:
 @pytest.fixture(scope="function")
 def fresh_caches():
     """
-    Patches the internal caches so each test starts with a fresh state.
+    内部キャッシュにパッチを適用して、各テストが新しい状態で開始されるようにします。
     """
     with (
         mock.patch("dbt_osmosis.core.schema.reader._YAML_BUFFER_CACHE", {}),
@@ -42,23 +42,23 @@ def fresh_caches():
 
 def test_sync_node_to_yaml(yaml_context: YamlRefactorContext, fresh_caches):
     """
-    For a single node, we can confirm that sync_node_to_yaml runs without error,
-    using the real file or generating one if missing (in dry_run mode).
+    単一ノードの場合、実際のファイルを使用するか、存在しない場合はファイルを生成することで (dry_run モード)、
+    sync_node_to_yaml がエラーなしで実行されることを確認できます。
     """
     node = yaml_context.project.manifest.nodes["model.jaffle_shop_duckdb.customers"]
     sync_node_to_yaml(yaml_context, node, commit=False)
 
 
 def test_sync_node_to_yaml_versioned(yaml_context: YamlRefactorContext, fresh_caches):
-    """Test syncing a versioned node to YAML."""
+    """バージョン管理されたノードを YAML に同期するテストを行います。"""
     node = yaml_context.project.manifest.nodes["model.jaffle_shop_duckdb.stg_customers.v2"]
     sync_node_to_yaml(yaml_context, node, commit=False)
 
 
 def test_commit_yamls_no_write(yaml_context: YamlRefactorContext):
     """
-    Since dry_run=True, commit_yamls should not actually write anything to disk.
-    We just ensure no exceptions are raised.
+    dry_run=True なので、commit_yamls は実際にはディスクに何も書き込まないはずです。
+    例外が発生しないようにするだけです。
     """
     commit_yamls(
         yaml_handler=yaml_context.yaml_handler,

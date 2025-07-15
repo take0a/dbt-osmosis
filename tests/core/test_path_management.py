@@ -11,7 +11,7 @@ from dbt_osmosis.core.path_management import MissingOsmosisConfig, _get_yaml_pat
 @pytest.fixture(scope="module")
 def yaml_context() -> YamlRefactorContext:
     """
-    Creates a YamlRefactorContext for the real 'demo_duckdb' project.
+    実際の「demo duckdb」プロジェクト用の Yaml リファクタリング コンテキストを作成します。
     """
     cfg = DbtConfiguration(project_dir="demo_duckdb", profiles_dir="demo_duckdb")
     cfg.vars = {"dbt-osmosis": {}}
@@ -29,8 +29,8 @@ def yaml_context() -> YamlRefactorContext:
 
 def test_missing_osmosis_config_error(yaml_context: YamlRefactorContext):
     """
-    Ensures MissingOsmosisConfig is raised if there's no path template
-    for a model. We'll mock the node config so we remove any 'dbt-osmosis' key.
+    モデルのパステンプレートがない場合、MissingOsmosisConfig が確実に発生するようにします。
+    ノード設定をモック化して、'dbt-osmosis' キーを削除します。
     """
     node = None
     # Find some real model node

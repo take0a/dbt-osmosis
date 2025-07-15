@@ -12,7 +12,7 @@ from dbt_osmosis.core.sql_operations import compile_sql_code, execute_sql_code
 @pytest.fixture(scope="module")
 def yaml_context() -> YamlRefactorContext:
     """
-    Creates a YamlRefactorContext for the real 'demo_duckdb' project.
+    実際の「demo duckdb」プロジェクト用の Yaml リファクタリング コンテキストを作成します。
     """
     cfg = DbtConfiguration(project_dir="demo_duckdb", profiles_dir="demo_duckdb")
     cfg.vars = {"dbt-osmosis": {}}
@@ -30,9 +30,9 @@ def yaml_context() -> YamlRefactorContext:
 
 def test_compile_sql_code_no_jinja(yaml_context: YamlRefactorContext):
     """
-    Check compile_sql_code with a plain SELECT (no Jinja).
-    We should skip calling the 'process_node' logic and the returned node
-    should have the raw SQL as is.
+    compile_sql_code を単純なSELECT（Jinjaなし）で確認します。
+    「process_node」ロジックの呼び出しをスキップし、
+    返されるノードには生のSQLがそのまま含まれるはずです。
     """
     raw_sql = "SELECT 1 AS mycol"
     with mock.patch("dbt_osmosis.core.sql_operations.process_node") as mock_process:
@@ -44,8 +44,8 @@ def test_compile_sql_code_no_jinja(yaml_context: YamlRefactorContext):
 
 def test_compile_sql_code_with_jinja(yaml_context: YamlRefactorContext):
     """
-    Compile SQL that has Jinja statements, ensuring 'process_node' is invoked and
-    we get a compiled node.
+    Jinja ステートメントを含む SQL をコンパイルし、「process_node」が呼び出され、
+    コンパイルされたノードが取得されることを確認します。
     """
     raw_sql = "SELECT {{ 1 + 1 }} AS mycol"
     with (
@@ -65,7 +65,7 @@ def test_compile_sql_code_with_jinja(yaml_context: YamlRefactorContext):
 
 def test_execute_sql_code_no_jinja(yaml_context: YamlRefactorContext):
     """
-    If there's no jinja, 'execute_sql_code' calls adapter.execute directly with raw_sql.
+    jinja がない場合、「execute_sql_code」は raw_sql を使用して直接 adapter.execute を呼び出します。
     """
     raw_sql = "SELECT 42 AS meaning"
     with mock.patch.object(yaml_context.project._adapter, "execute") as mock_execute:
@@ -78,7 +78,7 @@ def test_execute_sql_code_no_jinja(yaml_context: YamlRefactorContext):
 
 def test_execute_sql_code_with_jinja(yaml_context: YamlRefactorContext):
     """
-    If there's Jinja, we compile first, then execute the compiled code.
+    Jinja がある場合は、まずコンパイルし、次にコンパイルされたコードを実行します。
     """
     raw_sql = "SELECT {{ 2 + 2 }} AS four"
     with (

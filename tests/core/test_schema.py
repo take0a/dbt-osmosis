@@ -5,7 +5,8 @@ from dbt_osmosis.core.schema.parser import create_yaml_instance
 
 def test_create_yaml_instance_settings():
     """
-    Quick check that create_yaml_instance returns a configured YAML object with custom indenting.
+    create_yaml_instance が、カスタム インデントを使用して構成された 
+    YAML オブジェクトを返すことを簡単に確認します。
     """
     y = create_yaml_instance(indent_mapping=4, indent_sequence=2, indent_offset=0)
     assert y.map_indent == 4

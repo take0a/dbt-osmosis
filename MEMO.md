@@ -259,3 +259,25 @@ _reload_manifest
 ### core.plugins.py
 ### core.sync_operations.py
 ### sql.proxy.py
+
+# テスト
+## VSCode
+```json: .vscode/setting.json
+{
+    "python.testing.pytestEnabled": true,
+}
+```
+
+- この設定をすると tests/**/*.py の def test_* と class Test* が使える
+    - 関数かクラスかの違いは、よくわからないが、スコープぐらいか？
+
+## pytest
+### @pytest.fixture デコレータ
+- デコレートされた関数をテスト関数の引数に渡すと、デコレートされた関数の結果が渡される（ので、前処理になる）
+- モックを作って渡す。テスト関数ではモックを使ってゴニョゴニョする
+
+### @pytest.mark.parametrize デコレータ
+- 引数の値を外出しできる
+- タプルのリストでバリエーション指定もできる
+- VSCode のテストアイコンは、デコレータを含めた関数の先頭に付く
+

@@ -7,8 +7,8 @@ import dbt.version
 from dbt.contracts.graph.manifest import Manifest
 from packaging.version import Version
 
-# Test that all major functions can still be imported from the main osmosis module
-# This ensures backwards compatibility
+# すべての主要な機能がメインのosmosis モジュールからインポートできることをテストします
+# これにより下位互換性が確保されます
 from dbt_osmosis.core.osmosis import (
     DbtConfiguration,
     YamlRefactorSettings,
@@ -26,7 +26,7 @@ dbt_version = Version(dbt.version.get_installed_version().to_version_string(skip
 
 def load_demo_manifest() -> Manifest:
     """
-    Helper for verifying certain known nodes.
+    特定の既知のノードを検証するためのヘルパー。
     """
     manifest_path = Path("demo_duckdb/target/manifest.json")
     assert manifest_path.is_file(), "Must have a compiled manifest.json in demo_duckdb/target"
@@ -36,8 +36,8 @@ def load_demo_manifest() -> Manifest:
 
 def test_real_manifest_contains_customers():
     """
-    Quick test ensuring your 'demo_duckdb' project manifest includes 'customers' node
-    in the expected location (model.jaffle_shop_duckdb.customers).
+    'demo_duckdb' プロジェクト マニフェストに、予想される場所 (model.jaffle_shop_duckdb.customers) に 
+    'customers' ノードが含まれていることを確認する簡単なテストです。
     """
     manifest = load_demo_manifest()
     assert "model.jaffle_shop_duckdb.customers" in manifest.nodes
@@ -45,8 +45,8 @@ def test_real_manifest_contains_customers():
 
 def test_backwards_compatibility_imports():
     """
-    Test that all major functions are available from the main osmosis module.
-    This ensures that existing code using osmosis imports continues to work.
+    すべての主要な関数がメインのOsmosisモジュールから利用可能であることをテストします。
+    これにより、Osmosisインポートを使用している既存のコードが引き続き動作することが保証されます。
     """
     # Test that key functions are callable (basic smoke test)
     assert callable(create_dbt_project_context)

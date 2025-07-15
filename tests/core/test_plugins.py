@@ -9,8 +9,8 @@ from dbt_osmosis.core.plugins import (
 
 def test_plugin_manager_hooks():
     """
-    Ensure FuzzyCaseMatching and FuzzyPrefixMatching are registered by default,
-    and that get_candidates works as expected.
+    FuzzyCaseMatching と FuzzyPrefixMatching がデフォルトで登録され、
+    get_candidates が期待どおりに動作することを確認します。
     """
     pm = get_plugin_manager()
     # We can search for the classes

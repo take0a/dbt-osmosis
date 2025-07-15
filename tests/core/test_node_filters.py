@@ -6,7 +6,7 @@ from dbt_osmosis.core.node_filters import _topological_sort
 
 
 def test_topological_sort():
-    """Test the topological sort functionality."""
+    """トポロジカルソート機能をテストします。"""
     # We'll simulate a trivial adjacency-like approach:
     node_a = mock.MagicMock()
     node_b = mock.MagicMock()

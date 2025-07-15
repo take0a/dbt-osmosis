@@ -21,7 +21,7 @@ from dbt_osmosis.core.path_management import create_missing_source_yamls
 @pytest.fixture(scope="module")
 def yaml_context() -> YamlRefactorContext:
     """
-    Creates a YamlRefactorContext for the real 'demo_duckdb' project.
+    実際の「demo duckdb」プロジェクト用の Yaml リファクタリング コンテキストを作成します。
     """
     cfg = DbtConfiguration(project_dir="demo_duckdb", profiles_dir="demo_duckdb")
     cfg.vars = {"dbt-osmosis": {}}
@@ -40,7 +40,7 @@ def yaml_context() -> YamlRefactorContext:
 @pytest.fixture(scope="function")
 def fresh_caches():
     """
-    Patches the internal caches so each test starts with a fresh state.
+    内部キャッシュにパッチを適用して、各テストが新しい状態で開始されるようにします。
     """
     with mock.patch("dbt_osmosis.core.schema.reader._YAML_BUFFER_CACHE", {}):
         yield
@@ -48,16 +48,16 @@ def fresh_caches():
 
 def test_create_missing_source_yamls(yaml_context: YamlRefactorContext, fresh_caches):
     """
-    Creates missing source YAML files if any are declared in dbt-osmosis sources
-    but do not exist in the manifest. Typically, might be none in your project.
+    dbt-osmosis ソースで宣言されているものの、マニフェストに存在しないソース YAML ファイルがある場合は、
+    不足しているソース YAML ファイルを作成します。通常、プロジェクトには存在しない可能性があります。
     """
     create_missing_source_yamls(yaml_context)
 
 
 def test_draft_restructure_delta_plan(yaml_context: YamlRefactorContext, fresh_caches):
     """
-    Ensures we can generate a restructure plan for real models and sources.
-    Usually, this plan might be empty if everything lines up already.
+    実際のモデルとソースの再構築プランを生成できるようにします。
+    通常、すべてが既に整っている場合、このプランは空になることがあります。
     """
     plan = draft_restructure_delta_plan(yaml_context)
     assert plan is not None
@@ -65,8 +65,8 @@ def test_draft_restructure_delta_plan(yaml_context: YamlRefactorContext, fresh_c
 
 def test_apply_restructure_plan(yaml_context: YamlRefactorContext, fresh_caches):
     """
-    Applies the restructure plan for the real project (in dry_run mode).
-    Should not raise errors even if the plan is empty or small.
+    実際のプロジェクトに再構築プランを適用します（dry_runモード）。
+    プランが空または小さい場合でもエラーは発生しません。
     """
     plan = draft_restructure_delta_plan(yaml_context)
     apply_restructure_plan(yaml_context, plan, confirm=False)
@@ -74,7 +74,7 @@ def test_apply_restructure_plan(yaml_context: YamlRefactorContext, fresh_caches)
 
 def test_pretty_print_plan(caplog):
     """
-    Test pretty_print_plan logs the correct output for each operation.
+    テスト pretty_print_plan は、各操作の正しい出力をログに記録します。
     """
     plan = RestructureDeltaPlan(
         operations=[
@@ -104,8 +104,9 @@ def test_apply_restructure_plan_confirm_prompt(
     yaml_context: YamlRefactorContext, fresh_caches, capsys
 ):
     """
-    We test apply_restructure_plan with confirm=True, mocking input to 'n' to skip it.
-    This ensures we handle user input logic.
+    apply_restructure_plan をconfirm=Trueでテストし、
+    入力を「n」にモックしてスキップするようにします。
+    これにより、ユーザー入力ロジックを確実に処理できます。
     """
     plan = RestructureDeltaPlan(
         operations=[
@@ -126,8 +127,8 @@ def test_apply_restructure_plan_confirm_yes(
     yaml_context: YamlRefactorContext, fresh_caches, capsys
 ):
     """
-    Same as above, but we input 'y' so it actually proceeds with the plan.
-    (No real writing occurs due to dry_run=True).
+    上記と同じですが、「y」を入力すると、実際にプランが続行されます。
+    （dry_run=True のため、実際の書き込みは行われません）。
     """
     plan = RestructureDeltaPlan(
         operations=[

@@ -68,13 +68,13 @@ def load_manifest() -> Manifest:
     ],
 )
 def test_build_node_ancestor_tree(node_id: str, expected_tree: dict[str, list[str]]):
-    """Test the build node ancestor tree functionality."""
+    """ビルド ノードの祖先ツリー機能をテストします。"""
     manifest = load_manifest()
     target_node = manifest.nodes[node_id]
     assert _build_node_ancestor_tree(manifest, target_node) == expected_tree
 
 
-# NOTE: downstream node has the following set in the test body, keep these in mind when creating cases
+# NOTE: 下流ノードのテスト本体には次の設定があります。ケースを作成するときはこれらに注意してください。
 # local_column.description = "I was steadfast and unyielding"
 # local_column.tags = ["baz"]
 # local_column.meta = {"c": 3}
@@ -219,7 +219,7 @@ def test_inherit_upstream_column_knowledge_with_various_settings(
     upstream_mutations: dict[str, t.Any],
     downstream_metadata: dict[str, t.Any],
 ):
-    """Test inherit_upstream_column_knowledge with various settings and configurations."""
+    """さまざまな設定と構成で inherit_upstream_column_knowledge をテストします。"""
     manifest = yaml_context.project.manifest
     target_node = manifest.nodes["model.jaffle_shop_duckdb.customers"]
     local_column = target_node.columns["customer_id"]
@@ -279,7 +279,7 @@ def test_inherit_upstream_column_knowledge_with_various_settings(
 def test_use_unrendered_descriptions(
     yaml_context: YamlRefactorContext, use_unrendered_descriptions: bool, expected_start: str
 ):
-    """Test the handling of unrendered descriptions."""
+    """レンダリングされていない説明の処理をテストします。"""
     manifest = yaml_context.project.manifest
     target_node = manifest.nodes["model.jaffle_shop_duckdb.orders"]
     yaml_context.settings.use_unrendered_descriptions = use_unrendered_descriptions

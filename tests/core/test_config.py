@@ -22,8 +22,8 @@ from dbt_osmosis.core.settings import YamlRefactorContext, YamlRefactorSettings
 @pytest.fixture(scope="module")
 def yaml_context() -> YamlRefactorContext:
     """
-    Creates a YamlRefactorContext for the real 'demo_duckdb' project,
-    which must contain a valid dbt_project.yml, profiles, and manifest.
+    実際の「demo_duckdb」プロジェクト用の YamlRefactorContext を作成します。
+    これには、有効な dbt_project.yml、プロファイル、マニフェストが含まれている必要があります。
     """
     cfg = DbtConfiguration(project_dir="demo_duckdb", profiles_dir="demo_duckdb")
     cfg.vars = {"dbt-osmosis": {}}
@@ -41,8 +41,8 @@ def yaml_context() -> YamlRefactorContext:
 
 def test_discover_project_dir(tmp_path):
     """
-    Ensures discover_project_dir falls back properly if no environment
-    variable is set and no dbt_project.yml is found in parents.
+    環境変数が設定されておらず、親に dbt_project.yml が見つからない場合に、
+    discover_project_dir が適切にフォールバックすることを保証します。
     """
     original_cwd = os.getcwd()
     os.chdir(tmp_path)
@@ -55,8 +55,8 @@ def test_discover_project_dir(tmp_path):
 
 def test_discover_profiles_dir(tmp_path):
     """
-    Ensures discover_profiles_dir falls back to ~/.dbt
-    if no DBT_PROFILES_DIR is set and no local profiles.yml is found.
+    DBT_PROFILES_DIR が設定されておらず、ローカルの profiles.yml が見つからない場合、
+    discover_profiles_dir が ~/.dbt にフォールバックするようにします。
     """
     original_cwd = os.getcwd()
     os.chdir(tmp_path)
@@ -69,7 +69,7 @@ def test_discover_profiles_dir(tmp_path):
 
 def test_config_to_namespace():
     """
-    Tests that DbtConfiguration is properly converted to argparse.Namespace.
+    DbtConfiguration が argparse.Namespace に適切に変換されることをテストします。
     """
     cfg = DbtConfiguration(project_dir="demo_duckdb", profiles_dir="demo_duckdb", target="dev")
     ns = config_to_namespace(cfg)
@@ -80,15 +80,15 @@ def test_config_to_namespace():
 
 def test_reload_manifest(yaml_context: YamlRefactorContext):
     """
-    Basic check that _reload_manifest doesn't raise, given a real project.
+    実際のプロジェクトでは、_reload_manifest が発生しないことの基本チェック。
     """
     _reload_manifest(yaml_context.project)
 
 
 def test_adapter_ttl_expiration(yaml_context: YamlRefactorContext):
     """
-    Check that if the TTL is expired, we refresh the connection in DbtProjectContext.adapter.
-    We patch time.time to simulate a large jump.
+    TTL が期限切れの場合は、DbtProjectContext.adapter で接続を更新することを確認します。
+    time.time にパッチを適用して、大きなジャンプをシミュレートします。
     """
     project_ctx = yaml_context.project
     old_adapter = project_ctx.adapter

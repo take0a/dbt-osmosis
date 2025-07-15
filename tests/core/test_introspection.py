@@ -18,7 +18,7 @@ from dbt_osmosis.core.introspection import (
 @pytest.fixture(scope="module")
 def yaml_context() -> YamlRefactorContext:
     """
-    Creates a YamlRefactorContext for the real 'demo_duckdb' project.
+    実際の「demo duckdb」プロジェクト用の Yaml リファクタリング コンテキストを作成します。
     """
     cfg = DbtConfiguration(project_dir="demo_duckdb", profiles_dir="demo_duckdb")
     cfg.vars = {"dbt-osmosis": {}}
@@ -37,7 +37,7 @@ def yaml_context() -> YamlRefactorContext:
 @pytest.fixture(scope="function")
 def fresh_caches():
     """
-    Patches the internal caches so each test starts with a fresh state.
+    内部キャッシュにパッチを適用して、各テストが新しい状態で開始されるようにします。
     """
     with (
         mock.patch("dbt_osmosis.core.introspection._COLUMN_LIST_CACHE", {}),
@@ -47,7 +47,7 @@ def fresh_caches():
 
 def test_get_columns_simple(yaml_context: YamlRefactorContext, fresh_caches):
     """
-    Tests the get_columns flow on a known table, e.g., 'customers'.
+    既知のテーブル (例: 'customers') で get_columns フローをテストします。
     """
     node = yaml_context.project.manifest.nodes["model.jaffle_shop_duckdb.customers"]
     cols = get_columns(yaml_context, node)
@@ -55,7 +55,7 @@ def test_get_columns_simple(yaml_context: YamlRefactorContext, fresh_caches):
 
 
 def test_find_first():
-    """Test the _find_first utility function."""
+    """_find_first ユーティリティ関数をテストします。"""
     data = [1, 2, 3, 4]
     assert _find_first(data, lambda x: x > 2) == 3
     assert _find_first(data, lambda x: x > 4) is None
@@ -70,13 +70,13 @@ def test_find_first():
     ],
 )
 def test_normalize_column_name_snowflake(input_col, expected):
-    """Test column name normalization for Snowflake adapter."""
+    """Snowflake アダプタの列名の正規化をテストします。"""
     # For snowflake, if quoted - we preserve case but strip quotes, otherwise uppercase
     assert normalize_column_name(input_col, "snowflake") == expected
 
 
 def test_normalize_column_name_others():
-    """Test column name normalization for other adapters."""
+    """他のアダプタの列名の正規化をテストします。"""
     # For other adapters, we only strip outer quotes but do not uppercase or lowercase for now
     assert normalize_column_name('"My_Col"', "duckdb") == "My_Col"
     assert normalize_column_name("my_col", "duckdb") == "my_col"
@@ -84,7 +84,8 @@ def test_normalize_column_name_others():
 
 def test_maybe_use_precise_dtype_numeric():
     """
-    Check that _maybe_use_precise_dtype uses the data_type if numeric_precision_and_scale is enabled.
+    numeric_precision_and_scale が有効な場合、
+    _maybe_use_precise_dtype が data_type を使用していることを確認します。
     """
     from dbt.adapters.base.column import Column
 
@@ -96,8 +97,9 @@ def test_maybe_use_precise_dtype_numeric():
 
 def test_maybe_use_precise_dtype_string():
     """
-    If string_length is True, we use col.data_type (like 'varchar(256)')
-    instead of col.dtype (which might be 'VARCHAR').
+    string_length が True の場合、
+    col.dtype ('VARCHAR' の可能性があります) の代わりに 
+    col.data_type ('varchar(256)' など) を使用します。
     """
     from dbt.adapters.base.column import Column
 
@@ -109,8 +111,8 @@ def test_maybe_use_precise_dtype_string():
 
 def test_get_setting_for_node_basic():
     """
-    Check that _get_setting_for_node can read from node.meta, etc.
-    We mock the node to have certain meta fields.
+    _get_setting_for_node が node.meta などから読み取ることができることを確認します。
+    特定のメタ フィールドを持つようにノードをモックします。
     """
     node = mock.Mock()
     node.config.extra = {}
